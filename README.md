@@ -21,6 +21,27 @@ Ganache as local blockchain
 6. xWinTimeLockVault.sol
 
 
+## Smart Contract Deployed in Mainnet
+
+#### xWin Protocol
+0x1Bf7fe7568211ecfF68B6bC7CCAd31eCd8fe8092
+
+#### xWin Sector Vault:
+1. xWin Binance-Peg Infra Index (XWIN-XFI): 0x77Fbc2309e27cC783F9007fEbcCde7E5BA5ebd8C
+2. xWin BSC DEFI Index (XWIN-DEFI): 0x96303976FC1df9AaA2707861C7E44B365E4b9dc5
+
+#### xWin LP Vault:
+1. PancakeLP USDT-BNB Vault (PCLP-USDT): 0x296E829c57BBfb1c90F07cF85ca690e4809F1Adc
+2. PancakeLP CAKE-BNB Vault (PCLP-CAKE): 0xfeC25dF3f78E9E0F9ACA78e4718616b245445867
+
+#### xWin Master
+0x884D381aAB4cAB776EfA9bDEaA1d5b5C7B9D67DC
+
+#### xWin Farming Pool
+pool 0 : XWIN Token Farming
+
+
+
 ## Smart Contract Deployed in Testnet
 #### xWin Master
 0x8d3a15D3274C507ba4F309fAC42c0517B9825636
