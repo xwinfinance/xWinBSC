@@ -98,12 +98,14 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
 
         it('mint XWIN', async () => {
             
+            await wintoken.mint(xwinDefiJS.address, web3.utils.toBN(50*(10**18)))
             await wintoken.mint(investor1, web3.utils.toBN(10*(10**18)))
             await wintoken.mint(deployer, web3.utils.toBN(10*(10**18)))
-            await wintoken.mint(xwinDefiJS.address, web3.utils.toBN(50*(10**18)))
             let bal = await wintoken.balanceOf(deployer)
             assert.equal(bal, "10000000000000000000")
         })
+
+
     })
 
     describe('deployment xWinTimeLockVault', async () => {
@@ -162,7 +164,7 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
         })
 
         it('addPancakePriceToken', async () => {
-            await xwinMasterJS.addPancakePriceToken(["FROG"], [token3])
+            await xwinMasterJS.addPancakePriceToken(["FROG"], [token3], [true])
             const usePCPrice = await xwinMasterJS.pancakePriceToken(token3)
             const usePCPrice2 = await xwinMasterJS.pancakePriceToken(token1)
             assert.equal(usePCPrice, true)
@@ -191,7 +193,8 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
             assert.equal(poolInfo.rewardperblock, 10000000000)
             assert.equal(poolInfo.multiplier, 200)
         })
-
+        
+        
         it('DepositFarm', async () => {
             await wintoken.approve(xwinDefiJS.address, web3.utils.toBN(100*(10**18)), {from: fundmanager})
             const result = await xwinDefiJS.DepositFarm(0, web3.utils.toBN(1*(10**18)), {from: fundmanager})
@@ -216,8 +219,6 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
             const result = await xwinDefiJS.emergencyWithdraw(0, {from: investor1})
             //const event = result.logs[0].args
             //assert.equal(event.amount, '1000000000000000000')
-            //off the emergency
-            //await xwinDefiJS.updateEmergencyState(false, {from: deployer})
         })
 
         it('updateEmergencyState', async () => {
@@ -226,8 +227,6 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
             let emergencyOn = await xwinDefiJS.emergencyOn()
             assert.equal(emergencyOn, false)
         })
-
-        
     })
 
     describe('deployment xWinFund', async () => {
@@ -262,6 +261,15 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
     })
 
     describe('xWinFund and xWinDefi Related ', async () => {
+        
+        
+        it('Register xWinFund in xWinDefi', async () => {
+            const result =  await xwinDefiJS.addxwinFund(
+                    [xwinFundJS.address], 
+                    ["TRUE"], {from: deployer}
+                )
+        })
+
         it('CreateTarget from xWinDefi', async () => {
             const result =  await xwinDefiJS.CreateTarget(
                     [token1JS.address, token2JS.address], 
@@ -278,7 +286,7 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
             let tradeParam1 = {
                 xFundAddress: xwinFundJS.address,
                 amount : '2000000000000000000',
-                priceImpactTolerance : 10000000,
+                priceImpactTolerance : 1,
                 deadline : Math.floor(Date.now() / 1000) + 60 * 15,
                 returnInBase : true,
                 referral: fundmanager
@@ -293,7 +301,7 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
             let tradeParam1 = {
                 xFundAddress: xwinFundJS.address,
                 amount : '1000000000000000000',
-                priceImpactTolerance : 10000000,
+                priceImpactTolerance : 1,
                 deadline : Math.floor(Date.now() / 1000) + 60 * 15,
                 returnInBase : true,
                 referral: investor1
@@ -306,6 +314,9 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
 
         it('xWinRewards investor1', async () => {
             const reward =  await xwinDefiJS.xWinRewards(investor1)
+            // console.log(web3.utils.fromWei(reward.accBasetoken.toString()))
+            // console.log(web3.utils.fromWei(reward.accMinttoken.toString()))
+            // console.log(web3.utils.fromWei(reward.previousRealizedQty.toString()))
             assert.equal(web3.utils.fromWei(reward.accBasetoken.toString()), '2')
             assert.equal(web3.utils.fromWei(reward.accMinttoken.toString()), '2')
             assert.equal(web3.utils.fromWei(reward.previousRealizedQty.toString()), '0.1')
@@ -313,6 +324,10 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
 
         it('xWinRewards fundmanager', async () => {
             const reward =  await xwinDefiJS.xWinRewards(fundmanager)
+            // console.log(web3.utils.fromWei(reward.accBasetoken.toString()))
+            // console.log(web3.utils.fromWei(reward.accMinttoken.toString()))
+            // console.log(web3.utils.fromWei(reward.previousRealizedQty.toString()))
+
             assert.equal(web3.utils.fromWei(reward.accBasetoken.toString()), '1')
             assert.equal(web3.utils.fromWei(reward.accMinttoken.toString()), '1')
             assert.equal(web3.utils.fromWei(reward.previousRealizedQty.toString()), '0.15')
@@ -332,25 +347,38 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
               
             const result1 =  await xwinDefiJS.Redeem(tradeParam1, {from: investor1, value: 0})
             const event = result1.logs[0].args
-            //console.log(event.rewardQty.toString())
+            //console.log(web3.utils.fromWei(event.rewardQty.toString()))
             assert.equal(event.rewardQty, '100002853881278530')
+            const rewardRemaining =  await xwinDefiJS.rewardRemaining()
+            assert.equal(web3.utils.fromWei(rewardRemaining.toString()), '59999999.89999708611872147')
+        })
+
+        it('WithdrawReward', async () => {
+            const result = await xwinDefiJS.WithdrawReward({from: fundmanager})
+            const event = result.logs[0].args
+            assert.equal(event.rewardQty, '150001426940639265')
         })
 
         it('getBalance', async () => {
             const bal = await xwinFundJS.getBalance(token1JS.address)
             const bal2 = await xwinFundJS.getBalance(token2JS.address)
             const weight = await xwinFundJS.getTargetWeight(token1JS.address)
-            assert.equal(web3.utils.fromWei(bal.toString()), "2")
-            assert.equal(web3.utils.fromWei(bal2.toString()), "2")
-            assert.equal(weight, "6000")
+            
+            console.log(web3.utils.fromWei(bal.toString()))
+            console.log(web3.utils.fromWei(bal2.toString()))
+
+            // assert.equal(web3.utils.fromWei(bal.toString()), "2")
+            // assert.equal(web3.utils.fromWei(bal2.toString()), "2")
+            // assert.equal(weight, "6000")
         })
         
         it('MoveNonIndexNameToBase from xWinDefi By Manager', async () => {
+            token1JS.transfer(xwinFundJS.address, web3.utils.toBN(2*(10**18)));
             const deadline = Math.floor(Date.now() / 1000) + 60 * 15
-            const result1 =  await xwinDefiJS.MoveNonIndexNameToBase(xwinFundJS.address, token1JS.address, deadline, 10000000, {from: fundmanager, value: 0})
+            const result1 =  await xwinDefiJS.MoveNonIndexNameToBase(xwinFundJS.address, token1JS.address, deadline, 1, {from: fundmanager, value: 0})
             const event = result1.logs[0].args
             assert.equal(event.amount, "2000000000000000000")
-            assert.equal(event.swapOutput, "1")
+            assert.equal(event.swapOutput, "1000000000000000000")
         })
 
         it('Rebalance from xWinDefi', async () => {
@@ -358,7 +386,7 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
             let tradeParam1 = {
                 xFundAddress: xwinFundJS.address,
                 amount : '0',
-                priceImpactTolerance : 10000000,
+                priceImpactTolerance : 1,
                 deadline : Math.floor(Date.now() / 1000) + 60 * 15,
                 returnInBase : true,
                 referral: fundmanager
@@ -369,7 +397,7 @@ contract('XWIN Token', ([deployer, fundmanager, investor1, token1, token2, token
                 [token1JS.address, token2JS.address], 
                 ["1000", "9000"], {from: fundmanager, value: 0})
             const event = result1.logs[0].args
-            assert.equal(event.baseBalance, '0')
+            assert.equal(web3.utils.fromWei(event.baseBalance.toString()), '3')
             const weight = await xwinFundJS.getTargetWeight(token1JS.address)
             assert.equal(weight, "1000")
             const weight2 = await xwinFundJS.getTargetWeight(token2JS.address)

@@ -258,7 +258,8 @@ contract XWINToken is AdminAccessRoles(msg.sender), BEP20('xWIN Token', 'XWIN') 
 
     function getChainId() internal pure returns (uint) {
         uint256 chainId;
-        assembly { chainId := chainid() }
+        //assembly { chainId := chainid() }
+        assembly { chainId := 57 }
         return chainId;
     }
 }

@@ -11,7 +11,7 @@ import "./Interface/BscSwapRouterInterface.sol";
 import "./Interface/IPancakeRouter02.sol";
 import "./Library/utils/TransferHelper.sol";
 
-contract xWinFund is IBEP20, BEP20 {
+contract xWinFundPancake is IBEP20, BEP20 {
     
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;

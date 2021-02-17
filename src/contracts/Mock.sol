@@ -59,8 +59,8 @@ contract Mock is Ownable{
         returns (uint[] memory amounts){
             
             uint[] memory tempamounts = new uint[](1);
-            tempamounts[0] = 1;
-            //TransferHelper.safeTransfer(path[0], to, tempamounts[0]);
+            tempamounts[0] = 1e18;
+            TransferHelper.safeTransfer(path[0], to, tempamounts[0]);
             return tempamounts;
         }
 

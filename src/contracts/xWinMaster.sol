@@ -6,9 +6,6 @@ import "./Library/access/Ownable.sol";
 import "./Interface/BandProtocolInterface.sol";
 import "./Interface/BscSwapRouterInterface.sol";
 import "./Library/BscSwapLibrary.sol";
-// ****** Turn on for unit test only
-import "./mock/MockLibrary.sol";
-// ****** Turn on for unit test only
 
 contract xWinMaster is Ownable {
     
@@ -51,7 +48,7 @@ contract xWinMaster is Ownable {
     function getRouterAddress() external view returns (address ){
          return BscRouterV2;
     }
-    
+
     /// @dev return aave and chainlink price address
     function updateTokenNames(
         address[] calldata underlyingAddress, 
@@ -62,10 +59,10 @@ contract xWinMaster is Ownable {
         }
     }
     
-    function addPancakePriceToken(string [] memory _tokenname, address[] calldata _addressToken) public onlyOwner {
+    function addPancakePriceToken(string [] memory _tokenname, address[] calldata _addressToken, bool [] memory _usePancake) public onlyOwner {
         
         for (uint i = 0; i < _tokenname.length; i++) {
-            pancakePriceToken[_addressToken[i]] = true;
+            pancakePriceToken[_addressToken[i]] = _usePancake[i];
         }
     }
     
@@ -95,13 +92,9 @@ contract xWinMaster is Ownable {
     ) public view 
         returns (uint amountOutB, uint amountOutA) {
         
-        (uint reserveA, uint reserveB) = MockLibrary.getReserves(bscswapRouter.factory(), targetToken, bscswapRouter.WBNB());
-        amountOutB = MockLibrary.getAmountOut(1e18, reserveA, reserveB);
-        amountOutA = MockLibrary.getAmountOut(1e18, reserveB, reserveA);
-        
-        // (uint reserveA, uint reserveB) = BSCswapLibrary.getReserves(bscswapRouter.factory(), targetToken, bscswapRouter.WBNB());
-        // amountOutB = BSCswapLibrary.getAmountOut(1e18, reserveA, reserveB);
-        // amountOutA = BSCswapLibrary.getAmountOut(1e18, reserveB, reserveA);
+        (uint reserveA, uint reserveB) = BSCswapLibrary.getReserves(bscswapRouter.factory(), targetToken, bscswapRouter.WBNB());
+        amountOutB = BSCswapLibrary.quote(1e18, reserveA, reserveB);
+        amountOutA = BSCswapLibrary.quote(1e18, reserveB, reserveA);
         
         return (amountOutB, amountOutA);
         

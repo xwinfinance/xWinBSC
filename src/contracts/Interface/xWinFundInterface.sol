@@ -15,6 +15,7 @@ interface xWinFund {
     function updateManager(address managerAdd) external payable;
     function updateManagerFee(uint256 newFeebps) external payable;
     function updateRebalancePeriod(uint newCycle) external payable;
+    function updateProtocol(address _newProtocol) external;
     
     function Redeem(
         xWinLib.TradeParams memory _tradeParams,

@@ -266,7 +266,8 @@ contract SyrupBar is BEP20('SyrupBar Token', 'SYRUP') {
 
     function getChainId() internal pure returns (uint) {
         uint256 chainId;
-        assembly { chainId := chainid() }
+        // assembly { chainId := chainid() }
+        assembly { chainId := 57 }
         return chainId;
     }
 }

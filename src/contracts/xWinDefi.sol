@@ -27,6 +27,7 @@ contract xWinDefi is Ownable, ReentrancyGuard {
     uint256 public startblock;
     bool public emergencyOn = false;
     mapping (uint256 => mapping (address => xWinLib.UserInfo)) public userInfo;
+    mapping(address => bool) public isxwinFund;
     xWinLib.PoolInfo[] public poolInfo;
     
     mapping(address => xWinLib.xWinReward) public xWinRewards;
@@ -34,6 +35,7 @@ contract xWinDefi is Ownable, ReentrancyGuard {
     uint256 private rewardperuint = 95129375951;
     uint256 private referralperunit = 100000000000000000;
     uint256 private managerRewardperunit = 50000000000000000;
+    uint256 public rewardRemaining = 60000000000000000000000000;
     
     event Received(address, uint);
 
@@ -80,6 +82,13 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         emit Received(msg.sender, msg.value);
     }
     
+    function addxwinFund(address[] calldata _fundaddress, bool [] memory _isxwinFund) public onlyOwner {
+        
+        for (uint i = 0; i < _fundaddress.length; i++) {
+            isxwinFund[_fundaddress[i]] = _isxwinFund[i];
+        }
+    }
+    
     function poolLength() external view returns (uint256) {
         return poolInfo.length;
     }
@@ -115,6 +124,12 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         emergencyOn = _state;
     }
     
+    /// @dev update xwin defi protocol
+    function updateProtocol(address _fundaddress, address _newProtocol) external onlyOwner {
+        xWinFund _xWinFund = xWinFund(_fundaddress);
+        _xWinFund.updateProtocol(_newProtocol);
+    }
+    
      /// @dev create or update farm pool fee by deployer
     function updateFarmPoolInfo(uint256 _pid, uint256 _rewardperblock, uint256 _multiplier) external onlyOwner {
         
@@ -139,6 +154,7 @@ contract xWinDefi is Ownable, ReentrancyGuard {
     /// @dev View function to see pending xWin on frontend.
     function pendingXwin(uint256 _pid, address _user) public view returns (uint256) {
         
+        if(rewardRemaining == 0) return 0;
         xWinLib.PoolInfo memory pool = poolInfo[_pid];
         xWinLib.UserInfo memory user = userInfo[_pid][_user];
         uint blockdiff = block.number.sub(user.blockstart);
@@ -186,6 +202,7 @@ contract xWinDefi is Ownable, ReentrancyGuard {
     /// @dev perform subscription based on ratio setup and put into lending if available 
     function Subscribe(xWinLib.TradeParams memory _tradeParams) public nonReentrant onlyNonEmergency payable {
         
+        require(isxwinFund[_tradeParams.xFundAddress] == true, "not xwin fund");
         xWinLib.xWinReferral memory _xWinReferral = xWinReferral[msg.sender];
         require(msg.sender != _tradeParams.referral, "referal cannot be own address");
         
@@ -194,9 +211,13 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         }
         xWinFund _xWinFund = xWinFund(_tradeParams.xFundAddress);
         TransferHelper.safeTransferBNB(_tradeParams.xFundAddress, _tradeParams.amount);
+        // uint256 mintQty = 0;
         uint256 mintQty = _xWinFund.Subscribe(_tradeParams, msg.sender);
-        _storeRewardQty(msg.sender, _tradeParams.amount, mintQty);
-        _updateReferralReward(_tradeParams, _xWinFund.getWhoIsManager());
+        
+        if(rewardRemaining > 0){
+            _storeRewardQty(msg.sender, _tradeParams.amount, mintQty);
+            _updateReferralReward(_tradeParams, _xWinFund.getWhoIsManager());
+        }
         emit _Subscribe(msg.sender, _tradeParams.xFundAddress, _tradeParams.amount, mintQty);
     }
     
@@ -204,6 +225,7 @@ contract xWinDefi is Ownable, ReentrancyGuard {
     function Redeem(xWinLib.TradeParams memory _tradeParams) external nonReentrant onlyNonEmergency payable {
         
         require(IBEP20(_tradeParams.xFundAddress).balanceOf(msg.sender) >= _tradeParams.amount, "Not enough balance to redeem");
+        require(isxwinFund[_tradeParams.xFundAddress] == true, "not xwin fund");
         TransferHelper.safeTransferFrom(_tradeParams.xFundAddress, msg.sender, address(this), _tradeParams.amount);
         xWinFund _xWinFund = xWinFund(_tradeParams.xFundAddress);
         uint256 redeemratio = _xWinFund.Redeem(_tradeParams, msg.sender);
@@ -286,9 +308,19 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         return platformWallet;
     }
     
+    /// @dev get platform wallet address
+    function gexWinBenefitPool() view external returns (address) {
+        return xwinBenefitPool;
+    }
+    
     /// @dev update platform fee by deployer
     function updateXwinBenefitPool(address _xwinBenefitPool) external onlyOwner {
         xwinBenefitPool = _xwinBenefitPool;
+    }
+    
+    /// @dev update rewardRemaining by deployer
+    function updateRewardRemaining(uint256 _newRemaining) external onlyOwner {
+        rewardRemaining = _newRemaining;
     }
     
     /// @dev update platform fee by deployer
@@ -306,15 +338,14 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         managerRewardperunit = _managerRewardperunit;
     }
     
-    /// @dev return multiplier for reward calculation
     function _multiplier(uint256 _blockstart) internal view returns (uint256) {
         
         if(_blockstart == 0) return 0;
         uint256 blockdiff = _blockstart.sub(startblock); 
-        if(blockdiff < 2628000) return 50000; //first 3 months, 5x
-        if(blockdiff >= 2628000 && blockdiff <= 5256000) return 25000; //then following 3 months 
-        if(blockdiff >= 5256000 && blockdiff <= 10512000) return 12500; //then following 6 months
-        if(blockdiff > 10512000) return 10000;
+        if(blockdiff < 5256000) return 50000; //first 6 months, 5x
+        if(blockdiff >= 5256000 && blockdiff <= 10512000) return 25000; //then following 6 months 
+        if(blockdiff >= 10512000 && blockdiff <= 15768000) return 12500; //then following 6 months
+        if(blockdiff > 15768000) return 10000;
     }
     
     /// @dev get estimated reward of XWN token
@@ -325,9 +356,7 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         uint blockdiff = block.number.sub(_xwinReward.blockstart);
         uint256 currentRealizedQty = _multiplier(_xwinReward.blockstart).mul(rewardperuint).mul(blockdiff).mul(_xwinReward.accBasetoken).div(1e18).div(10000); 
         uint256 allRealizedQty = currentRealizedQty.add(_xwinReward.previousRealizedQty);
-        
-        uint256 xwinTokenBal = IBEP20(xWinToken).balanceOf(address(this));
-        return  (xwinTokenBal >= allRealizedQty) ? allRealizedQty: xwinTokenBal;
+        return  (rewardRemaining >= allRealizedQty) ? allRealizedQty: rewardRemaining;
     }
     
     function GetQuotes(
@@ -361,7 +390,6 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         emit _StakeMyReward(msg.sender, rewardQty);
     }
     
-    /// @dev referal get referal reward in accumulated xwn rewards pool
     function _updateReferralReward(xWinLib.TradeParams memory _tradeParams, address _managerAddress) internal {
         
         xWinLib.xWinReferral storage _xWinReferral = xWinReferral[msg.sender];
@@ -393,14 +421,12 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         _xwinReward.previousRealizedQty = 0;
         _xwinReward.blockstart = block.number;
         
-        uint256 xwinTokenBal = IBEP20(xWinToken).balanceOf(address(this));
-        uint amountWithdraw = (xwinTokenBal >= rewardQty) ? rewardQty: xwinTokenBal;
+        uint amountWithdraw = (rewardRemaining >= rewardQty) ? rewardQty: rewardRemaining;
         
         if(amountWithdraw > 0) _sendRewards(msg.sender, amountWithdraw);
         emit _WithdrawReward(msg.sender, amountWithdraw);
     }
     
-    /// @dev update accumulated xwn token rewards when subscribe
     function _storeRewardQty(address from, uint256 baseQty, uint256 mintQty) internal {
 
         xWinLib.xWinReward storage _xwinReward =  xWinRewards[from];
@@ -420,9 +446,9 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         }
     }
     
-    /// @dev update accumulated xwn token rewards stats when redeem
     function _updateRewardBal(address from, uint256 redeemUnit) internal returns (uint256 rewardQty){
 
+        if(rewardRemaining == 0) return 0;
         xWinLib.xWinReward storage _xwinReward =  xWinRewards[from];
         rewardQty = GetEstimateReward(from);
         
@@ -446,15 +472,24 @@ contract xWinDefi is Ownable, ReentrancyGuard {
     }
     
     /// @dev emergency trf XWN token to new protocol
-    function ProtocolTransfer(address _newProtocol) public onlyOwner onlyEmergency payable {
-        uint tokenBalance = IBEP20(xWinToken).balanceOf(address(this));
-        TransferHelper.safeTransfer(xWinToken, _newProtocol, tokenBalance);
+    function ProtocolTransfer(address _newProtocol, uint256 amount) public onlyOwner onlyEmergency payable {
+        TransferHelper.safeTransfer(xWinToken, _newProtocol, amount);
     }
     
     function _sendRewards(address _to, uint256 amount) internal {
+        
+        if(rewardRemaining == 0) return;
         uint256 xwinTokenBal = IBEP20(xWinToken).balanceOf(address(this));
-        uint amountTosend = (xwinTokenBal >= amount) ? amount: xwinTokenBal;
-        TransferHelper.safeTransfer(xWinToken, _to, amountTosend);
+        if(xwinTokenBal == 0) return;
+        
+        if(rewardRemaining >= amount && xwinTokenBal >= amount){
+            TransferHelper.safeTransfer(xWinToken, _to, amount);
+            rewardRemaining = rewardRemaining.sub(amount);
+        }else{
+            uint amountTosend = (xwinTokenBal >= amount) ? amount: xwinTokenBal;
+            TransferHelper.safeTransfer(xWinToken, _to, amountTosend);
+            rewardRemaining = 0; //mark reward ended
+        }
     }
     
     function _resetRewards(address _from) internal {

@@ -114,11 +114,10 @@ contract xWinFarm is IBEP20, BEP20 {
             path[1] = toDest;
             
             (uint reserveA,  uint reserveB) = BSCswapLibrary.getReserves(bscswapRouter.factory(), bscswapRouter.WBNB(), farmToken);
-            uint amountOut = BSCswapLibrary.getAmountOut(amountIn, reserveA, reserveB);
-            uint[] memory amounts = bscswapRouter.swapExactBNBForTokens{value: amountIn}(amountOut.mul(priceImpactTolerance).div(10000), path, destAddress, deadline);
+            uint quote = BSCswapLibrary.quote(amountIn, reserveA, reserveB);
+            uint[] memory amounts = bscswapRouter.swapExactBNBForTokens{value: amountIn}(quote.sub(quote.mul(priceImpactTolerance).div(10000)), path, destAddress, deadline);
             
-            uint swapOutput = amounts[amounts.length - 1];
-            return swapOutput;
+            return amounts[amounts.length - 1];
         }
 
     function _swapTokenToBNB(
@@ -137,10 +136,9 @@ contract xWinFarm is IBEP20, BEP20 {
             TransferHelper.safeApprove(token, address(bscswapRouter), amountIn); 
             
             (uint reserveA,  uint reserveB) = BSCswapLibrary.getReserves(bscswapRouter.factory(), farmToken, bscswapRouter.WBNB());
-            uint amountOut = BSCswapLibrary.getAmountOut(amountIn, reserveA, reserveB);
-            uint[] memory amounts = bscswapRouter.swapExactTokensForBNB(amountIn, amountOut.mul(priceImpactTolerance).div(10000), path, destAddress, deadline);
-			uint swapOutput = amounts[amounts.length - 1];
-            return swapOutput;
+            uint quote = BSCswapLibrary.quote(amountIn, reserveA, reserveB);
+            uint[] memory amounts = bscswapRouter.swapExactTokensForBNB(amountIn, quote.sub(quote.mul(priceImpactTolerance).div(10000)), path, destAddress, deadline);
+			return amounts[amounts.length - 1];
 
         }
         
@@ -170,6 +168,12 @@ contract xWinFarm is IBEP20, BEP20 {
         
         emit _ManagerOwnerUpdate(managerOwner, newManager, block.timestamp);
         managerOwner = newManager;
+    }
+    
+    /// @dev update protocol owner
+    function updateProtocol(address _newProtocol) external onlyxWinProtocol {
+        protocolOwner = _newProtocol;
+        xwinProtocol = xWinDefiInterface(_newProtocol);
     }
     
     /// @dev update manager fee
@@ -320,11 +324,7 @@ contract xWinFarm is IBEP20, BEP20 {
         
     }
     
-    /// @dev withdraw reward of XWN token
-    function _getWithdrawRewardWithCushion(
-        address tokenaddress,
-        uint256 withdrawQty
-        ) internal view returns ( 
+    function _getWithdrawRewardWithCushion(address tokenaddress, uint256 withdrawQty) internal view returns ( 
             uint256 totalSupply, uint256 ratio, uint256 reserveA, uint256 reserveB, 
             uint256 ATokenAmount, uint256 amountB, uint256 ATokenAmountMin, uint256 amountBMin,
             address pair 
@@ -489,7 +489,10 @@ contract xWinFarm is IBEP20, BEP20 {
             totalCakeBal = totalCakeBal.add(pendingCake);
         }
         
-        uint256 farmTokenBalance = IBEP20(farmToken).balanceOf(address(this));
+        uint256 farmTokenBalance = 0;
+        if(cakeToken != farmToken){
+            farmTokenBalance = IBEP20(farmToken).balanceOf(address(this));
+        }
         
         farmtoBNBEstAmount = 0;
         caketoBNBEstAmount = 0;

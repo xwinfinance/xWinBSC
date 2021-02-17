@@ -7,7 +7,7 @@ import "./Interface/BandProtocolInterface.sol";
 import "./Interface/IPancakeRouter02.sol";
 import "./Library/PancakeSwapLibrary.sol";
 
-contract xWinMaster is Ownable {
+contract xWinMasterP is Ownable {
     
     string public name;
     address private deployeraddress;

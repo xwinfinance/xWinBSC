@@ -10,6 +10,7 @@ import "./Interface/xWinMasterInterface.sol";
 import "./Interface/BscSwapRouterInterface.sol";
 import "./Interface/IPancakeRouter02.sol";
 import "./Library/utils/TransferHelper.sol";
+import "./Library/BscSwapLibrary.sol";
 // ****** Turn on for unit test only
 import "./mock/MockLibrary.sol";
 // ****** Turn on for unit test only
@@ -95,15 +96,13 @@ contract xWinFund is IBEP20, BEP20 {
             path[0] = bscswapRouter.WBNB();
             path[1] = toDest;
             
-            uint[] memory amounts = bscswapRouter.swapExactBNBForTokens{value: amountIn}(0, path, destAddress, deadline);
+            //(uint reserveA,  uint reserveB) = BSCswapLibrary.getReserves(bscswapRouter.factory(), bscswapRouter.WBNB(), toDest);
+            //uint quote = BSCswapLibrary.quote(amountIn, reserveA, reserveB);
+            (uint reserveA,  uint reserveB) = MockLibrary.getReserves(bscswapRouter.factory(), bscswapRouter.WBNB(), toDest);
+            uint quote = MockLibrary.quote(amountIn, reserveA, reserveB);
+            uint[] memory amounts = bscswapRouter.swapExactBNBForTokens{value: amountIn}(quote.sub(quote.mul(priceImpactTolerance).div(10000)), path, destAddress, deadline);
             
-            uint swapOutput = amounts[amounts.length - 1];
-            (uint priceImpact, uint subValue, ) = _outOfTolerancePriceImpact(toDest, amountIn, swapOutput, false);
-            
-            if(swapOutput < subValue){
-                //require(priceImpact <= priceImpactTolerance, "price impact is higher");
-            }
-            return swapOutput;
+            return amounts[amounts.length - 1];
         }
 
     function _swapTokenToBNB(
@@ -121,38 +120,16 @@ contract xWinFund is IBEP20, BEP20 {
             
             TransferHelper.safeApprove(token, address(bscswapRouter), amountIn); 
             
-            uint[] memory amounts = bscswapRouter.swapExactTokensForBNB(amountIn, 0, path, destAddress, deadline);
+            // (uint reserveA,  uint reserveB) = BSCswapLibrary.getReserves(bscswapRouter.factory(), token, bscswapRouter.WBNB());
+            // uint quote = BSCswapLibrary.quote(amountIn, reserveA, reserveB);
+            (uint reserveA,  uint reserveB) = MockLibrary.getReserves(bscswapRouter.factory(), token, bscswapRouter.WBNB());
+            uint quote = MockLibrary.quote(amountIn, reserveA, reserveB);
             
-            uint swapOutput = amounts[amounts.length - 1];
-            (uint priceImpact, uint subValue, ) = _outOfTolerancePriceImpact(token, amountIn, swapOutput, true);
+            uint[] memory amounts = bscswapRouter.swapExactTokensForBNB(amountIn, quote.sub(quote.mul(priceImpactTolerance).div(10000)), path, destAddress, deadline);
             
-            if(swapOutput < subValue){
-                //require(priceImpact <= priceImpactTolerance, "price impact is higher");
-            }
-            return swapOutput;
+            return amounts[amounts.length - 1];
         }
         
-    function _outOfTolerancePriceImpact(
-            address tokenaddress, 
-            uint amountIn, 
-            uint swapOutput, 
-            bool toBNB
-        ) internal view returns (uint priceImpact, uint subValue, uint price){
-        
-        require(swapOutput > 0, "swapOutput is zero");
-        uint256 nominator = 1e18;
-        price = toBNB == true? _getLatestPrice(tokenaddress) : nominator.mul(1e18).div(_getLatestPrice(tokenaddress));
-        subValue = amountIn.mul(price).div(1e18);
-        require(subValue > 0, "subValue is zero");
-        priceImpact = 0;
-        if(swapOutput >= subValue){
-            priceImpact = swapOutput.mul(10000).div(subValue).sub(10000);
-        }else{
-            priceImpact = subValue.mul(10000).div(swapOutput).sub(10000);
-        }
-        return (priceImpact, subValue, price);
-    }    
-    
     /// Get All the fund data needed for client
     function GetFundDataAll() external view returns (
           IBEP20 _baseToken,
@@ -222,6 +199,12 @@ contract xWinFund is IBEP20, BEP20 {
         
         emit _ManagerOwnerUpdate(managerOwner, newManager, block.timestamp);
         managerOwner = newManager;
+    }
+    
+    /// @dev update protocol owner
+    function updateProtocol(address _newProtocol) external onlyxWinProtocol {
+        protocolOwner = _newProtocol;
+        xwinProtocol = xWinDefiInterface(_newProtocol);
     }
     
     /// @dev update manager fee
@@ -320,7 +303,7 @@ contract xWinFund is IBEP20, BEP20 {
                 for (uint i = 0; i < targetNamesAddress.length; i++) {
                     uint256 proposalQty = getTargetWeightQty(targetNamesAddress[i], totalSubs);
                     if(proposalQty > 0){
-                        _swapBNBToTokens(targetNamesAddress[i], proposalQty, _tradeParams.deadline, address(this), _tradeParams.priceImpactTolerance);
+                       // _swapBNBToTokens(targetNamesAddress[i], proposalQty, _tradeParams.deadline, address(this), _tradeParams.priceImpactTolerance);
                     }
                 }
             }
@@ -378,6 +361,13 @@ contract xWinFund is IBEP20, BEP20 {
         uint256 totalBaseBal = address(this).balance;
         uint256 totalOutput = redeemratio.mul(totalBaseBal).div(1e18);
         TransferHelper.safeTransferBNB(_investorAddress, totalOutput);
+        
+        for (uint i = 0; i < targetNamesAddress.length; i++) {
+            xWinLib.transferData memory _transferData = _getTransferAmt(targetNamesAddress[i], redeemratio);
+            if(_transferData.totalTrfAmt > 0){
+                TransferHelper.safeTransfer(targetNamesAddress[i], _investorAddress, _transferData.totalTrfAmt);
+            }
+        }
     }
         
     /// @dev Calc return balance during redemption
@@ -419,7 +409,9 @@ contract xWinFund is IBEP20, BEP20 {
     function _rebalance(uint256 deadline, uint256 priceImpactTolerance) 
         internal returns (uint256 baseccyBal) {
         
+        //sell overweight names first
         (xWinLib.UnderWeightData[] memory underweightNames, uint256 totalunderActiveweight) = _sellOverWeightNames (deadline, priceImpactTolerance);
+        //get total proceeds in BNB after seling overweight names and buy underweight names
         baseccyBal = _buyUnderWeightNames(deadline, priceImpactTolerance, underweightNames, totalunderActiveweight); 
         nextRebalance = block.number.add(rebalanceCycle);
         return baseccyBal;
@@ -433,12 +425,14 @@ contract xWinFund is IBEP20, BEP20 {
         
         underweightNames = new xWinLib.UnderWeightData[](targetNamesAddress.length);
 
+        //get overweight name
         for (uint i = 0; i < targetNamesAddress.length; i++) {
             (uint256 rebalQty, uint256 destActiveWeight, bool overweight, uint256 fundWeight) = _getActiveOverWeight(targetNamesAddress[i], totalfundvaluebefore);
             if(overweight) //sell token to BNB
             {
                 _swapTokenToBNB(targetNamesAddress[i], rebalQty, deadline, address(this), priceImpactTolerance);
             }else{
+                //collect the total fund weight for underweight names
                 if(destActiveWeight > 0){
                     xWinLib.UnderWeightData memory _underWeightData;
                     _underWeightData.token = targetNamesAddress[i];
@@ -463,6 +457,7 @@ contract xWinFund is IBEP20, BEP20 {
         ) 
         internal returns (uint256 baseccyBal) {
         
+        //get total proceeds in BNB after seling overweight names
         baseccyBal = address(this).balance;
         for (uint i = 0; i < underweightNames.length; i++) {
             
@@ -480,9 +475,10 @@ contract xWinFund is IBEP20, BEP20 {
     function _getLatestPrice(address _targetAdd) internal view returns (uint256) {
         return _xWinMaster.getPriceByAddress(_targetAdd, BaseTokenName);
     }
-
+    
     function _getFundValues() internal view returns (uint256){
         
+        //get BNB value first if any
         uint256 totalValue = address(this).balance;
         for (uint i = 0; i < targetNamesAddress.length; i++) {
             uint256 tokenBalance = _getBalance(targetNamesAddress[i]);
@@ -559,6 +555,7 @@ contract xWinFund is IBEP20, BEP20 {
         
         deletedNames = new xWinLib.DeletedNames[](targetNamesAddress.length);
 
+        // identitfy deleted name
         for (uint i = 0; i < targetNamesAddress.length; i++) {
             uint matchtotal = 1;
             for (uint x = 0; x < _toAddresses.length; x++){
@@ -606,6 +603,8 @@ contract xWinFund is IBEP20, BEP20 {
         
         if(fundvalue == 0) return false;
         uint256 percentage = subsAmt.mul(10000).div(fundvalue);
+        
+        //if more than 5% to the fund, consider not small
         if(percentage > 500) return false;
         
         return true;

@@ -14,11 +14,11 @@ const maxSupply = web3.utils.toBN(100*(10**18))
 
 module.exports = (deployer, network, [owner]) => {
   return deployer
+    .then(() => deployer.deploy(Mock))
     .then(() => deployer.deploy(SampleTokenBTC, "BTC", "BTC", 18, maxSupply))
     .then(() => deployer.deploy(SampleToken1, "ETH", "ETH", 18, maxSupply))
     .then(() => deployer.deploy(WINTOKEN, maxSupply))
     .then(() => deployer.deploy(xWinTimeLockVault, "xWin Team Vault", 1, WINTOKEN.address))
-    .then(() => deployer.deploy(Mock))
     .then(() => deployer.deploy(xWinMaster, Mock.address, Mock.address))
     .then(() => deployer.deploy(xWinStake, "xWin Stake Helper", Mock.address))
     .then(() => deployer.deploy(xWinDefi, 50, managerAddress, managerAddress, xWinStake.address, WINTOKEN.address))

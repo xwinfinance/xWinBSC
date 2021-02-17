@@ -6,7 +6,7 @@ module.exports = {
     development: {
       host: "127.0.0.1",
       port: 7545,
-      gas: 8000000,
+      gas: 60000000,
       network_id: "*" // Match any network id
     },
   },
@@ -17,12 +17,19 @@ module.exports = {
       version: "^0.6",
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 1000
       },
-      evmVersion: "petersburg"
+      evmVersion: "petersburg",
+      allowUnlimitedContractSize: true
     }
   },
-  server: {
-    "allowUnlimitedContractSize": true
+  solc: {
+    version: "^0.6",
+    optimizer: {
+      enabled: true,
+      runs: 1000
+    },
+    evmVersion: "petersburg",
+    allowUnlimitedContractSize: true
   }
 }

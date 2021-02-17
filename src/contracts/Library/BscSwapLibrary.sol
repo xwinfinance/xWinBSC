@@ -4,7 +4,7 @@ pragma solidity >=0.5.0;
 
 //import "github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../Interface/IBSCswapPair.sol";
-import "../Library/math/SafeMath.sol";
+import "./math/SafeMath.sol";
 
 library BSCswapLibrary {
     using SafeMath for uint;

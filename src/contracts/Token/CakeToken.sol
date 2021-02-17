@@ -240,7 +240,8 @@ contract CakeToken is BEP20('PancakeSwap Token', 'Cake') {
 
     function getChainId() internal pure returns (uint) {
         uint256 chainId;
-        assembly { chainId := chainid() }
+        //assembly { chainId := chainid() }
+        assembly { chainId := 57 }
         return chainId;
     }
 }

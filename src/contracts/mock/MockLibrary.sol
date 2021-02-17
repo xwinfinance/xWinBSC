@@ -29,15 +29,15 @@ library MockLibrary {
 
     // fetches and sorts the reserves for a pair
     function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
-        return (10000000, 20000000);
+        return (1000000000000000000, 2000000000000000000);
     }
 
     // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
     function quote(uint amountA, uint reserveA, uint reserveB) internal pure returns (uint amountB) {
-        //return 10000;
-        require(amountA > 0, 'BSCswapLibrary: INSUFFICIENT_AMOUNT');
-        require(reserveA > 0 && reserveB > 0, 'BSCswapLibrary: INSUFFICIENT_LIQUIDITY');
-        amountB = amountA.mul(reserveB) / reserveA;
+        return 1e18;
+        // require(amountA > 0, 'BSCswapLibrary: INSUFFICIENT_AMOUNT');
+        // require(reserveA > 0 && reserveB > 0, 'BSCswapLibrary: INSUFFICIENT_LIQUIDITY');
+        // amountB = amountA.mul(reserveB) / reserveA;
     }
 
     // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset

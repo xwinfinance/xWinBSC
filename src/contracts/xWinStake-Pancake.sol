@@ -7,7 +7,7 @@ import "./Interface/IPancakeRouter02.sol";
 import "./Library/utils/TransferHelper.sol";
 import "./Library/access/Ownable.sol";
 
-contract xWinStake is Ownable  {
+contract xWinStakeP is Ownable  {
     
     using SafeMath for uint256;
 
