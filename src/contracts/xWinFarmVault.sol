@@ -306,6 +306,9 @@ contract xWinFarm is IBEP20, BEP20 {
         uint256 cakeBal = IBEP20(cakeToken).balanceOf(address(this));
         totalOutput = totalOutput.add(amountBNB);
         
+        uint256 cakeBalDiff = cakeBal;
+        if(cakeToken == farmToken) cakeBalDiff = cakeBal.sub(amountToken);
+        
         //convert farmtoken and return in BNB
         uint256 swapOutput = 0;
         if(amountToken > 0){
@@ -314,8 +317,8 @@ contract xWinFarm is IBEP20, BEP20 {
         } 
         
         //convert caketoken and return in BNB
-        if(cakeBal > 0){
-            swapOutput = _swapTokenToBNB(cakeToken, redeemratio.mul(cakeBal).div(1e18), _tradeParams.deadline, address(this), _tradeParams.priceImpactTolerance);
+        if(cakeBalDiff > 0){
+            swapOutput = _swapTokenToBNB(cakeToken, redeemratio.mul(cakeBalDiff).div(1e18), _tradeParams.deadline, address(this), _tradeParams.priceImpactTolerance);
             totalOutput = totalOutput.add(swapOutput);
         } 
         uint finalSwapOutput = _handleFeeTransfer(totalOutput);

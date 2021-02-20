@@ -211,7 +211,6 @@ contract xWinDefi is Ownable, ReentrancyGuard {
         }
         xWinFund _xWinFund = xWinFund(_tradeParams.xFundAddress);
         TransferHelper.safeTransferBNB(_tradeParams.xFundAddress, _tradeParams.amount);
-        // uint256 mintQty = 0;
         uint256 mintQty = _xWinFund.Subscribe(_tradeParams, msg.sender);
         
         if(rewardRemaining > 0){

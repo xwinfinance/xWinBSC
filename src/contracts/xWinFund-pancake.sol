@@ -7,11 +7,12 @@ import "./Interface/xWinDefiInterface.sol";
 import "./Library/token/BEP20.sol";
 import "./Library/token/SafeBEP20.sol";
 import "./Interface/xWinMasterInterface.sol";
-import "./Interface/BscSwapRouterInterface.sol";
 import "./Interface/IPancakeRouter02.sol";
 import "./Library/utils/TransferHelper.sol";
+import "./Library/PancakeSwapLibrary.sol";
 
-contract xWinFundPancake is IBEP20, BEP20 {
+
+contract xWinFund is IBEP20, BEP20 {
     
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
@@ -29,19 +30,13 @@ contract xWinFundPancake is IBEP20, BEP20 {
     uint256 public nextRebalance;
     address public BaseToken = address(0x0000000000000000000000000000000000000000);
     string public BaseTokenName = "BNB";
-    IBSCswapRouter02 bscswapRouter;
     IPancakeRouter02 pancakeSwapRouter;
     xWinDefiInterface xwinProtocol;
 
     event Received(address, uint);
-    event _Subscribe(address indexed from, uint256 subsAmt, uint256 mintQty, uint txnTime);
-    event _Redeem(address indexed from, uint256 redeemUnit, bool returnInBase, uint256 redeemratio, uint txnTime);
     event _ManagerFeeUpdate(uint256 fromFee, uint256 toFee, uint txnTime);
     event _ManagerOwnerUpdate(address fromAddress, address toAddress, uint txnTime);
     event _RebalanceCycleUpdate(uint fromCycle, uint toCycle, uint txnTime);
-    event _RebalanceAllInOne(uint256 baseBalance, uint txnTime);
-    event _CreateTarget(address[] newTargets, uint256[] newWeight, uint txnTime);
-    event _MoveNonIndexNameToBaseEvent(address tokenAddress, uint256 amount, uint swapOutput);
 
     modifier onlyxWinProtocol {
         require(
@@ -66,12 +61,11 @@ contract xWinFundPancake is IBEP20, BEP20 {
             uint256 _managerFeeBps,
             address _masterOwner
         ) public BEP20(name, symbol) {
-            protocolOwner = _protocolOwner; //xwindefi contract
+            protocolOwner = _protocolOwner;
             masterOwner = _masterOwner;
             managerOwner = _managerOwner;
             managerFeeBps = _managerFeeBps;
             _xWinMaster = xWinMaster(masterOwner);
-            //bscswapRouter = IBSCswapRouter02(_xWinMaster.getBSCRouterAddress());
             pancakeSwapRouter = IPancakeRouter02(_xWinMaster.getRouterAddress());
             xwinProtocol = xWinDefiInterface(_protocolOwner);
             nextRebalance = block.number.add(rebalanceCycle);
@@ -98,15 +92,11 @@ contract xWinFundPancake is IBEP20, BEP20 {
             path[0] = pancakeSwapRouter.WETH();
             path[1] = toDest;
             
-            uint[] memory amounts = pancakeSwapRouter.swapExactETHForTokens{value: amountIn}(0, path, destAddress, deadline);
+            (uint reserveA,  uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), pancakeSwapRouter.WETH(), toDest);
+            uint quote = PancakeLibrary.quote(amountIn, reserveA, reserveB);
+            uint[] memory amounts = pancakeSwapRouter.swapExactETHForTokens{value: amountIn}(quote.sub(quote.mul(priceImpactTolerance).div(10000)), path, destAddress, deadline);
             
-            uint swapOutput = amounts[amounts.length - 1];
-            (uint priceImpact, uint subValue, ) = _outOfTolerancePriceImpact(toDest, amountIn, swapOutput, false);
-            
-            if(swapOutput < subValue){
-                require(priceImpact <= priceImpactTolerance, "price impact is higher");
-            }
-            return swapOutput;
+            return amounts[amounts.length - 1];
         }
 
     function _swapTokenToBNB(
@@ -124,38 +114,14 @@ contract xWinFundPancake is IBEP20, BEP20 {
             
             TransferHelper.safeApprove(token, address(pancakeSwapRouter), amountIn); 
             
-            uint[] memory amounts = pancakeSwapRouter.swapExactTokensForETH(amountIn, 0, path, destAddress, deadline);
+            (uint reserveA,  uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), token, pancakeSwapRouter.WETH());
+            uint quote = PancakeLibrary.quote(amountIn, reserveA, reserveB);
             
-            uint swapOutput = amounts[amounts.length - 1];
-            (uint priceImpact, uint subValue, ) = _outOfTolerancePriceImpact(token, amountIn, swapOutput, true);
+            uint[] memory amounts = pancakeSwapRouter.swapExactTokensForETH(amountIn, quote.sub(quote.mul(priceImpactTolerance).div(10000)), path, destAddress, deadline);
             
-            if(swapOutput < subValue){
-                require(priceImpact <= priceImpactTolerance, "price impact is higher");
-            }
-            return swapOutput;
+            return amounts[amounts.length - 1];
         }
         
-    function _outOfTolerancePriceImpact(
-            address tokenaddress, 
-            uint amountIn, 
-            uint swapOutput, 
-            bool toBNB
-        ) internal view returns (uint priceImpact, uint subValue, uint price){
-        
-        require(swapOutput > 0, "swapOutput is zero");
-        uint256 nominator = 1e18;
-        price = toBNB == true? _getLatestPrice(tokenaddress) : nominator.mul(1e18).div(_getLatestPrice(tokenaddress));
-        subValue = amountIn.mul(price).div(1e18);
-        require(subValue > 0, "subValue is zero");
-        priceImpact = 0;
-        if(swapOutput >= subValue){
-            priceImpact = swapOutput.mul(10000).div(subValue).sub(10000);
-        }else{
-            priceImpact = subValue.mul(10000).div(swapOutput).sub(10000);
-        }
-        return (priceImpact, subValue, price);
-    }    
-    
     /// Get All the fund data needed for client
     function GetFundDataAll() external view returns (
           IBEP20 _baseToken,
@@ -211,7 +177,6 @@ contract xWinFundPancake is IBEP20, BEP20 {
     ) external onlyxWinProtocol payable {
 
         _createTargetNames(_toAddresses, _targetWeight);
-        emit _CreateTarget(_toAddresses, _targetWeight, block.timestamp);
     }
 
     /// @dev update manager owner
@@ -226,6 +191,12 @@ contract xWinFundPancake is IBEP20, BEP20 {
         
         emit _ManagerOwnerUpdate(managerOwner, newManager, block.timestamp);
         managerOwner = newManager;
+    }
+    
+    /// @dev update protocol owner
+    function updateProtocol(address _newProtocol) external onlyxWinProtocol {
+        protocolOwner = _newProtocol;
+        xwinProtocol = xWinDefiInterface(_newProtocol);
     }
     
     /// @dev update manager fee
@@ -285,7 +256,7 @@ contract xWinFundPancake is IBEP20, BEP20 {
         uint256[] calldata _targetWeight,
         uint256 deadline,
         uint256 priceImpactTolerance
-        ) external onlyxWinProtocol payable {
+        ) external onlyxWinProtocol payable returns (uint256 baseccyBal) {
         
         //get delete names
         xWinLib.DeletedNames[] memory deletedNames = _getDeleteNames(_toAddresses);
@@ -300,9 +271,8 @@ contract xWinFundPancake is IBEP20, BEP20 {
         _createTargetNames(_toAddresses, _targetWeight);
         
         //rebalance
-        uint256 baseccyBal = _rebalance(deadline, priceImpactTolerance);
-        
-        emit _RebalanceAllInOne(baseccyBal, block.timestamp);
+        baseccyBal = _rebalance(deadline, priceImpactTolerance);
+        return baseccyBal;
     }
     
     /// @dev perform subscription based on ratio setup
@@ -330,7 +300,6 @@ contract xWinFundPancake is IBEP20, BEP20 {
                 }
             }
         }
-        emit _Subscribe(_investorAddress, _tradeParams.amount, mintQty, block.timestamp);
         return mintQty;
     }
     
@@ -338,7 +307,7 @@ contract xWinFundPancake is IBEP20, BEP20 {
     function Redeem(
         xWinLib.TradeParams memory _tradeParams,
         address _investorAddress
-    ) external onlyxWinProtocol payable {
+    ) external onlyxWinProtocol payable returns (uint256){
         
         uint256 redeemratio = _tradeParams.amount.mul(1e18).div(totalSupply());
         require(redeemratio > 0, "redeem ratio is zero");
@@ -359,7 +328,7 @@ contract xWinFundPancake is IBEP20, BEP20 {
         }
         uint finalSwapOutput = _handleFeeTransfer(totalOutput);
         TransferHelper.safeTransferBNB(_investorAddress, finalSwapOutput);
-        emit _Redeem(_investorAddress, _tradeParams.amount, _tradeParams.returnInBase, redeemratio, block.timestamp);
+        return redeemratio;
     }
     
     /// @dev fund owner move any name back to BNB
@@ -367,13 +336,14 @@ contract xWinFundPancake is IBEP20, BEP20 {
         address _tokenaddress,
         uint256 deadline,
         uint256 priceImpactTolerance
-        ) external onlyxWinProtocol payable {
+        ) external onlyxWinProtocol returns (uint256 balanceToken, uint256 swapOutput) {
             
-            (uint256 balanceToken, uint256 swapOutput) = _moveNonIndexNameToBase(_tokenaddress, deadline, priceImpactTolerance);
-            emit _MoveNonIndexNameToBaseEvent(_tokenaddress, balanceToken, swapOutput);
+            (balanceToken, swapOutput) = _moveNonIndexNameToBase(_tokenaddress, deadline, priceImpactTolerance);
+            return (balanceToken, swapOutput);
         }
         
-    /// @dev fund owner move all token to BNB. user call this to get the portion in BNB
+        
+    /// @dev get the proportional token without swapping it in emergency case
     function emergencyRedeem(uint256 redeemUnit, address _investorAddress) external onlyxWinProtocol payable {
             
         uint256 redeemratio = redeemUnit.mul(1e18).div(totalSupply());
@@ -382,6 +352,13 @@ contract xWinFundPancake is IBEP20, BEP20 {
         uint256 totalBaseBal = address(this).balance;
         uint256 totalOutput = redeemratio.mul(totalBaseBal).div(1e18);
         TransferHelper.safeTransferBNB(_investorAddress, totalOutput);
+        
+        for (uint i = 0; i < targetNamesAddress.length; i++) {
+            xWinLib.transferData memory _transferData = _getTransferAmt(targetNamesAddress[i], redeemratio);
+            if(_transferData.totalTrfAmt > 0){
+                TransferHelper.safeTransfer(targetNamesAddress[i], _investorAddress, _transferData.totalTrfAmt);
+            }
+        }
     }
         
     /// @dev Calc return balance during redemption

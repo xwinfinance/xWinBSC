@@ -10,7 +10,7 @@ import "./Library/utils/TransferHelper.sol";
 import "./Library/PancakeSwapLibrary.sol";
 
 
-contract xWinFarmP is IBEP20, BEP20 {
+contract xWinFarm is IBEP20, BEP20 {
     
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
@@ -113,11 +113,10 @@ contract xWinFarmP is IBEP20, BEP20 {
             path[1] = toDest;
             
             (uint reserveA,  uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), pancakeSwapRouter.WETH(), farmToken);
-            uint amountOut = PancakeLibrary.getAmountOut(amountIn, reserveA, reserveB);
-            uint[] memory amounts = pancakeSwapRouter.swapExactETHForTokens{value: amountIn}(amountOut.mul(priceImpactTolerance).div(10000), path, destAddress, deadline);
+            uint quote = PancakeLibrary.quote(amountIn, reserveA, reserveB);
+            uint[] memory amounts = pancakeSwapRouter.swapExactETHForTokens{value: amountIn}(quote.sub(quote.mul(priceImpactTolerance).div(10000)), path, destAddress, deadline);
             
-            uint swapOutput = amounts[amounts.length - 1];
-            return swapOutput;
+            return amounts[amounts.length - 1];
         }
 
     function _swapTokenToBNB(
@@ -136,10 +135,9 @@ contract xWinFarmP is IBEP20, BEP20 {
             TransferHelper.safeApprove(token, address(pancakeSwapRouter), amountIn); 
             
             (uint reserveA,  uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), farmToken, pancakeSwapRouter.WETH());
-            uint amountOut = PancakeLibrary.getAmountOut(amountIn, reserveA, reserveB);
-            uint[] memory amounts = pancakeSwapRouter.swapExactTokensForETH(amountIn, amountOut.mul(priceImpactTolerance).div(10000), path, destAddress, deadline);
-			uint swapOutput = amounts[amounts.length - 1];
-            return swapOutput;
+            uint quote = PancakeLibrary.quote(amountIn, reserveA, reserveB);
+            uint[] memory amounts = pancakeSwapRouter.swapExactTokensForETH(amountIn, quote.sub(quote.mul(priceImpactTolerance).div(10000)), path, destAddress, deadline);
+			return amounts[amounts.length - 1];
 
         }
         
@@ -169,6 +167,12 @@ contract xWinFarmP is IBEP20, BEP20 {
         
         emit _ManagerOwnerUpdate(managerOwner, newManager, block.timestamp);
         managerOwner = newManager;
+    }
+    
+    /// @dev update protocol owner
+    function updateProtocol(address _newProtocol) external onlyxWinProtocol {
+        protocolOwner = _newProtocol;
+        xwinProtocol = xWinDefiInterface(_newProtocol);
     }
     
     /// @dev update manager fee
@@ -299,7 +303,11 @@ contract xWinFarmP is IBEP20, BEP20 {
         _burn(msg.sender, _tradeParams.amount);
         
         uint256 cakeBal = IBEP20(cakeToken).balanceOf(address(this));
+        
         totalOutput = totalOutput.add(amountBNB);
+        
+        uint256 cakeBalDiff = cakeBal;
+        if(cakeToken == farmToken) cakeBalDiff = cakeBal.sub(amountToken);
         
         //convert farmtoken and return in BNB
         uint256 swapOutput = 0;
@@ -309,8 +317,8 @@ contract xWinFarmP is IBEP20, BEP20 {
         } 
         
         //convert caketoken and return in BNB
-        if(cakeBal > 0){
-            swapOutput = _swapTokenToBNB(cakeToken, redeemratio.mul(cakeBal).div(1e18), _tradeParams.deadline, address(this), _tradeParams.priceImpactTolerance);
+        if(cakeBalDiff > 0){
+            swapOutput = _swapTokenToBNB(cakeToken, redeemratio.mul(cakeBalDiff).div(1e18), _tradeParams.deadline, address(this), _tradeParams.priceImpactTolerance);
             totalOutput = totalOutput.add(swapOutput);
         } 
         uint finalSwapOutput = _handleFeeTransfer(totalOutput);
@@ -319,11 +327,7 @@ contract xWinFarmP is IBEP20, BEP20 {
         
     }
     
-    /// @dev withdraw reward of XWN token
-    function _getWithdrawRewardWithCushion(
-        address tokenaddress,
-        uint256 withdrawQty
-        ) internal view returns ( 
+    function _getWithdrawRewardWithCushion(address tokenaddress, uint256 withdrawQty) internal view returns ( 
             uint256 totalSupply, uint256 ratio, uint256 reserveA, uint256 reserveB, 
             uint256 ATokenAmount, uint256 amountB, uint256 ATokenAmountMin, uint256 amountBMin,
             address pair 
@@ -488,7 +492,10 @@ contract xWinFarmP is IBEP20, BEP20 {
             totalCakeBal = totalCakeBal.add(pendingCake);
         }
         
-        uint256 farmTokenBalance = IBEP20(farmToken).balanceOf(address(this));
+        uint256 farmTokenBalance = 0;
+        if(cakeToken != farmToken){
+            farmTokenBalance = IBEP20(farmToken).balanceOf(address(this));
+        }
         
         farmtoBNBEstAmount = 0;
         caketoBNBEstAmount = 0;
