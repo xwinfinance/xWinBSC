@@ -6,6 +6,9 @@ import "./Library/access/Ownable.sol";
 import "./Interface/BandProtocolInterface.sol";
 import "./Interface/BscSwapRouterInterface.sol";
 import "./Library/BscSwapLibrary.sol";
+// ****** Turn on for unit test only
+import "./mock/MockLibrary.sol";
+// ****** Turn on for unit test only
 
 contract xWinMaster is Ownable {
     

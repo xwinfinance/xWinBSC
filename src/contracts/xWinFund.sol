@@ -8,9 +8,9 @@ import "./Library/token/BEP20.sol";
 import "./Library/token/SafeBEP20.sol";
 import "./Interface/xWinMasterInterface.sol";
 import "./Interface/BscSwapRouterInterface.sol";
-import "./Interface/IPancakeRouter02.sol";
+//import "./Interface/IPancakeRouter02.sol";
 import "./Library/utils/TransferHelper.sol";
-import "./Library/BscSwapLibrary.sol";
+//import "./Library/BscSwapLibrary.sol";
 // ****** Turn on for unit test only
 import "./mock/MockLibrary.sol";
 // ****** Turn on for unit test only
@@ -34,7 +34,7 @@ contract xWinFund is IBEP20, BEP20 {
     address public BaseToken = address(0x0000000000000000000000000000000000000000);
     string public BaseTokenName = "BNB";
     IBSCswapRouter02 bscswapRouter;
-    IPancakeRouter02 pancakeSwapRouter;
+    //IPancakeRouter02 pancakeSwapRouter;
     xWinDefiInterface xwinProtocol;
 
     event Received(address, uint);
