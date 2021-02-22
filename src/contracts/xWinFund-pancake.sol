@@ -12,7 +12,7 @@ import "./Library/utils/TransferHelper.sol";
 import "./Library/PancakeSwapLibrary.sol";
 
 
-contract xWinFund is IBEP20, BEP20 {
+contract xWinFundP is IBEP20, BEP20 {
     
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;

@@ -6,6 +6,9 @@ import "./Library/BscSwapLibrary.sol";
 import "./Interface/BscSwapRouterInterface.sol";
 import "./Library/utils/TransferHelper.sol";
 import "./Library/access/Ownable.sol";
+// ****** Turn on for unit test only
+import "./mock/MockLibrary.sol";
+// ****** Turn on for unit test only
 
 contract xWinStake is Ownable  {
     
