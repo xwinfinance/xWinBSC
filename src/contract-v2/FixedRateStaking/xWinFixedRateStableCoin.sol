@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at BscScan.com on 2021-03-26
-*/
-
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: GPL-3.0-or-later
@@ -723,276 +719,6 @@ contract AutoFarm  {
         returns (uint256){}
 }
 
-contract iUSDT  {
-    function mint(address to, uint256 value) public {}
-    function burn(address _from, uint256 _amount) public {}
-    uint public tokenPrice;
-}
-
-interface IPancakeRouter01 {
-    function factory() external pure returns (address);
-    function WETH() external pure returns (address);
-
-    function addLiquidity(
-        address tokenA,
-        address tokenB,
-        uint amountADesired,
-        uint amountBDesired,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB, uint liquidity);
-    function addLiquidityETH(
-        address token,
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
-    function removeLiquidity(
-        address tokenA,
-        address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB);
-    function removeLiquidityETH(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountToken, uint amountETH);
-    function removeLiquidityWithPermit(
-        address tokenA,
-        address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountA, uint amountB);
-    function removeLiquidityETHWithPermit(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountToken, uint amountETH);
-    function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-    function swapTokensForExactTokens(
-        uint amountOut,
-        uint amountInMax,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
-        external
-        payable
-        returns (uint[] memory amounts);
-    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-        external
-        returns (uint[] memory amounts);
-    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-        external
-        returns (uint[] memory amounts);
-    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
-        external
-        payable
-        returns (uint[] memory amounts);
-
-    function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
-    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
-    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) external pure returns (uint amountIn);
-    function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
-    function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
-}
-
-interface IPancakeRouter02 is IPancakeRouter01 {
-    function removeLiquidityETHSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountETH);
-    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountETH);
-
-    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-    function swapExactETHForTokensSupportingFeeOnTransferTokens(
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable;
-    function swapExactTokensForETHSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-}
-
-interface IPancakePair {
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
-
-    function name() external pure returns (string memory);
-    function symbol() external pure returns (string memory);
-    function decimals() external pure returns (uint8);
-    function totalSupply() external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    function allowance(address owner, address spender) external view returns (uint);
-
-    function approve(address spender, uint value) external returns (bool);
-    function transfer(address to, uint value) external returns (bool);
-    function transferFrom(address from, address to, uint value) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-    function nonces(address owner) external view returns (uint);
-
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-
-    event Mint(address indexed sender, uint amount0, uint amount1);
-    event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
-    event Swap(
-        address indexed sender,
-        uint amount0In,
-        uint amount1In,
-        uint amount0Out,
-        uint amount1Out,
-        address indexed to
-    );
-    event Sync(uint112 reserve0, uint112 reserve1);
-
-    function MINIMUM_LIQUIDITY() external pure returns (uint);
-    function factory() external view returns (address);
-    function token0() external view returns (address);
-    function token1() external view returns (address);
-    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-    function price0CumulativeLast() external view returns (uint);
-    function price1CumulativeLast() external view returns (uint);
-    function kLast() external view returns (uint);
-
-    function mint(address to) external returns (uint liquidity);
-    function burn(address to) external returns (uint amount0, uint amount1);
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-    function skim(address to) external;
-    function sync() external;
-
-    function initialize(address, address) external;
-}
-
-library PancakeLibrary {
-    using SafeMath for uint;
-
-    // returns sorted token addresses, used to handle return values from pairs sorted in this order
-    function sortTokens(address tokenA, address tokenB) internal pure returns (address token0, address token1) {
-        require(tokenA != tokenB, 'PancakeLibrary: IDENTICAL_ADDRESSES');
-        (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        require(token0 != address(0), 'PancakeLibrary: ZERO_ADDRESS');
-    }
-
-    // calculates the CREATE2 address for a pair without making any external calls
-    function pairFor(address factory, address tokenA, address tokenB) internal pure returns (address pair) {
-        (address token0, address token1) = sortTokens(tokenA, tokenB);
-        pair = address(uint(keccak256(abi.encodePacked(
-                hex'ff',
-                factory,
-                keccak256(abi.encodePacked(token0, token1)),
-                hex'00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5' // init code hash
-            ))));
-    }
-
-    // fetches and sorts the reserves for a pair
-    function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
-        (address token0,) = sortTokens(tokenA, tokenB);
-        pairFor(factory, tokenA, tokenB);
-        (uint reserve0, uint reserve1,) = IPancakePair(pairFor(factory, tokenA, tokenB)).getReserves();
-        (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
-    }
-
-    // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
-    function quote(uint amountA, uint reserveA, uint reserveB) internal pure returns (uint amountB) {
-        require(amountA > 0, 'PancakeLibrary: INSUFFICIENT_AMOUNT');
-        require(reserveA > 0 && reserveB > 0, 'PancakeLibrary: INSUFFICIENT_LIQUIDITY');
-        amountB = amountA.mul(reserveB) / reserveA;
-    }
-
-    // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
-    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
-        require(amountIn > 0, 'PancakeLibrary: INSUFFICIENT_INPUT_AMOUNT');
-        require(reserveIn > 0 && reserveOut > 0, 'PancakeLibrary: INSUFFICIENT_LIQUIDITY');
-        uint amountInWithFee = amountIn.mul(9975);
-        uint numerator = amountInWithFee.mul(reserveOut);
-        uint denominator = reserveIn.mul(10000).add(amountInWithFee);
-        amountOut = numerator / denominator;
-    }
-
-    // given an output amount of an asset and pair reserves, returns a required input amount of the other asset
-    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) internal pure returns (uint amountIn) {
-        require(amountOut > 0, 'PancakeLibrary: INSUFFICIENT_OUTPUT_AMOUNT');
-        require(reserveIn > 0 && reserveOut > 0, 'PancakeLibrary: INSUFFICIENT_LIQUIDITY');
-        uint numerator = reserveIn.mul(amountOut).mul(10000);
-        uint denominator = reserveOut.sub(amountOut).mul(9975);
-        amountIn = (numerator / denominator).add(1);
-    }
-
-    // performs chained getAmountOut calculations on any number of pairs
-    function getAmountsOut(address factory, uint amountIn, address[] memory path) internal view returns (uint[] memory amounts) {
-        require(path.length >= 2, 'PancakeLibrary: INVALID_PATH');
-        amounts = new uint[](path.length);
-        amounts[0] = amountIn;
-        for (uint i; i < path.length - 1; i++) {
-            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i], path[i + 1]);
-            amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
-        }
-    }
-
-    // performs chained getAmountIn calculations on any number of pairs
-    function getAmountsIn(address factory, uint amountOut, address[] memory path) internal view returns (uint[] memory amounts) {
-        require(path.length >= 2, 'PancakeLibrary: INVALID_PATH');
-        amounts = new uint[](path.length);
-        amounts[amounts.length - 1] = amountOut;
-        for (uint i = path.length - 1; i > 0; i--) {
-            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i - 1], path[i]);
-            amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
-        }
-    }
-}
-
 contract BEP20 is Context, IBEP20, Ownable {
     using SafeMath for uint256;
     using Address for address;
@@ -1299,6 +1025,12 @@ contract BEP20 is Context, IBEP20, Ownable {
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 }
 
+contract ibAlpaca  {
+    
+    function deposit(uint256 _amount) public{}
+    function withdraw(uint256 share) public{}
+}
+
 contract xWinDefi  {
     
     struct UserInfo {
@@ -1319,74 +1051,70 @@ contract xWinDefi  {
 }
 
 
-contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
+contract xWinFixedRateStableCoin is ReentrancyGuard, IBEP20, BEP20 {
     
     using SafeMath for uint256;
 
     // Info of each pool.
     struct PoolInfo {
         string name;
+        uint maxLimit;       
         uint totalLockedSupply;
         uint totalInterestPaid;
         uint totalXWINPaid;
+        uint interestPerDay;
+        uint lockDays;
+        uint xwinMultiplier;
     }
     
     struct UserInfo {
-        uint amount; 
-        uint lpTokenAmount;
-        uint lpTokenStakedAmount;
+        uint amount;     
         uint lastHarvest; 
+        uint farmingStart;       
+        uint lockedEnd;
+        uint totalHarvest; 
+        uint unClaimBalance;
     }
     
-    bool public swapTokenB = true; 
-    uint public slippage = 50; 
-    uint public entryFee = 10; 
+    bool public stopDeposit = false; 
+    bool public emergency = false; 
+    uint public entryFee = 20; 
     uint public burnFee = 250; 
+    uint public oneDayBlock = 28750; 
     mapping (uint256 => mapping (address => UserInfo)) public userInfo;
     PoolInfo[] public poolInfo;
-    address public tokenB;
-    address public tokenA; 
+    address[] public userAddressArray;
+    mapping(address => bool) public userAddress;
+    address public stablecoin; 
     address public autoaddress = address(0xa184088a740c695E156F91f5cC086a06bb78b827);
-    address public tokenABLP;
     address public xwin = address(0xd88ca08d8eec1E9E09562213Ae83A7853ebB5d28);
-    address public investorWallet; 
-    address public managerWallet; 
-    address public platformWallet;
     address public burnAddress = address(0x000000000000000000000000000000000000dEaD);
+    address public platformWallet = address(0x62691eF999C7F07BC1653416df0eC4f3CDDBb0c7);
     
     AutoFarm _autoFarm = AutoFarm(address(0x0895196562C7868C5Be92459FaE7f877ED450452));
-    IPancakeRouter02 pancakeSwapRouter = IPancakeRouter02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
-    xWinDefi _xWinDefi = xWinDefi(address(0x1Bf7fe7568211ecfF68B6bC7CCAd31eCd8fe8092));
-    
-    
+    xWinDefi _xWinDefi;
+    ibAlpaca _ibAlpaca;
+
     uint public autopid; 
     uint public xwinpid = 0;
     
     event Received(address, uint);
     event _StakeToken(address indexed from, uint256 pid, uint256 depositAmt, uint256 finalDeposit);
     event _UnStakeToken(address indexed from, uint256 pid, uint256 totalReturnToUser);
-    event _harvestXWIN(address indexed from, uint256 balanceXWIN);
     
-
+    
     constructor (
             string memory name,
             string memory symbol,
-            address _tokenA,
-            address _tokenB,
-            address _tokenABLP,
-            address _investorWallet,
-            address _managerWallet,
-            address _platformWallet,
-            uint _autopid
-            
+            uint _autopid,
+            address _alpacaTokenaddress,
+            address xwindefi_,
+            address _stablecoin
         ) public BEP20(name, symbol) {
-            tokenA = _tokenA;
-            tokenB = _tokenB;
-            tokenABLP = _tokenABLP;
-            investorWallet = _investorWallet;
-            managerWallet = _managerWallet;
-            platformWallet = _platformWallet;
             autopid = _autopid;
+            _ibAlpaca = ibAlpaca(address(_alpacaTokenaddress));
+            _xWinDefi = xWinDefi(address(xwindefi_));
+            stablecoin = _stablecoin;
         }
         
     
@@ -1395,40 +1123,50 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
     }
     
 
-    function getXWINRewards(uint _pid) public view returns (uint) {
+    function getMyXWINRewards(uint _pid) public view returns (uint) {
         
-        uint xwinBalance = IBEP20(xwin).balanceOf(address(this));
-        uint pending = _xWinDefi.pendingXwin(_pid, address(this));
-        return xwinBalance.add(pending); 
+        PoolInfo memory pool = poolInfo[_pid];
+        UserInfo memory user = userInfo[_pid][msg.sender];
+        return _getxWINRewards(user.amount, user.lockedEnd, user.lastHarvest, pool.xwinMultiplier);
+    }
+    
+    function _getxWINRewards(uint _amount, uint _lockedEnd, uint _lastHarvest, uint _xwinMultiplier) internal view returns (uint) {
+        
+        (,uint rewardperblock, uint multiplier) = _xWinDefi.poolInfo(xwinpid);
+        uint maxBlock = block.number >= _lockedEnd? _lockedEnd: block.number;
+        uint blockdiff = maxBlock.sub(_lastHarvest);
+        uint currentRealizedQty = multiplier.mul(rewardperblock).mul(blockdiff).mul(_amount).div(1e18).div(100);
+        currentRealizedQty = currentRealizedQty.mul(_xwinMultiplier).div(10000);
+        return currentRealizedQty;
     }
     
     function updateRouter(
-        address pancakeSwapRouter_,
         address autoFarm_,
-        address xWinDefi_
+        address xWinDefi_,
+        address ibAlpaca_
         ) public onlyOwner {
-        pancakeSwapRouter = IPancakeRouter02(pancakeSwapRouter_);
         _autoFarm = AutoFarm(autoFarm_);
         _xWinDefi = xWinDefi(xWinDefi_);
+        _ibAlpaca = ibAlpaca(ibAlpaca_);
     }
 
     function updateTokenAddresses(
-        address _tokenB,
-        address _tokenA,
+        address _stablecoin,
         address _autoaddress,
-        address _tokenABLP,
         address _xwin
         ) public onlyOwner {
         
-        tokenB = _tokenB;
-        tokenA = _tokenA;
+        stablecoin = _stablecoin;
         autoaddress = _autoaddress;
-        tokenABLP = _tokenABLP;
         xwin = _xwin;
     }
 
-    function updateSwapFlag(bool _swapTokenB) public onlyOwner {
-        swapTokenB = _swapTokenB;
+    function updatePlatformWallet(address _platformWallet) public onlyOwner {
+        platformWallet = _platformWallet;
+    }
+    
+    function updateOneDayBlock(uint _oneDayBlock) public onlyOwner {
+        oneDayBlock = _oneDayBlock;
     }
     
     // update xwin farming pool id
@@ -1436,38 +1174,22 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         xwinpid = _xwinpid;
     }
     
-    function updateFee(uint _burnFee, uint _entryFee) public onlyOwner {
-        burnFee = _burnFee;
-        entryFee = _entryFee;
+    function updateStopDeposit(bool _stopDeposit) public onlyOwner {
+        stopDeposit = _stopDeposit;
     }
 
-    function updateSlippage(uint _slippage) public onlyOwner {
-        slippage = _slippage;
-    }
-    
-    function updateInvestorWallet(address _investorWallet) public onlyOwner {
-        investorWallet = _investorWallet;
+    function updateEmergency(bool _emergency) public onlyOwner {
+        emergency = _emergency;
     }
 
-    function updateManagerWallet(address _managerWallet) public onlyOwner {
-        managerWallet = _managerWallet;
-    }
-
-    function updateplatformWallet(address _platformWallet) public onlyOwner {
-        platformWallet = _platformWallet;
-    }
-    
     //allow admin to move unncessary token inside the contract
     function adminMoveToken(address _tokenAddress) public onlyOwner {
         uint256 tokenBal = IBEP20(_tokenAddress).balanceOf(address(this));
         TransferHelper.safeTransfer(_tokenAddress, msg.sender, tokenBal); 
     }
     
-    //allow admin to unfarmed from autofarm
-    function adminEmergencyRemoveAutoFarm() public onlyOwner {
-        
-        uint stakedBal = getTotalStakedBalance();
-        _autoFarm.withdraw(autopid, stakedBal);
+    function getNumberOfUsers() public view returns (uint) {
+        return userAddressArray.length;
     }
     
     function getNumberOfPools() public view returns (uint) {
@@ -1478,11 +1200,22 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         return _autoFarm.pendingAUTO(autopid, address(this));
     }
     
+    function getMyStakedBalance(uint _pid) public view returns (uint){
+        UserInfo memory user = userInfo[_pid][msg.sender];
+        return user.amount;
+    }
+
+    function getMyStakedBalanceWithInterest(uint _pid) public view returns (uint){
+        UserInfo memory user = userInfo[_pid][msg.sender];
+        (uint pendingInterest, ) = _entitledInterest(_pid, msg.sender);
+        return user.amount.add(pendingInterest);
+    }
+    
     function getTotalStakedBalance() public view returns (uint){
         return _autoFarm.stakedWantTokens(autopid, address(this));
     }
 
-    function getOwnershipStakeAmount(uint _userBalance) public view returns (uint){
+    function _getOwnershipStakeAmount(uint _userBalance) internal view returns (uint){
         
         uint256 redeemratio = _userBalance.mul(1e18).div(totalSupply());
         uint totalAutoStake = getTotalStakedBalance();
@@ -1491,256 +1224,194 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         return withdrawAmt;
     }
     
+    function updatePool(
+            uint _pid, 
+            uint _maxLimit,
+            uint _lockDays, 
+            uint _xwinMultiplier
+            ) public onlyOwner {
+        
+        PoolInfo storage pool = poolInfo[_pid];
+        pool.maxLimit = _maxLimit;
+        pool.lockDays = _lockDays;
+        pool.xwinMultiplier = _xwinMultiplier;
+    }
+
     function add(
-        string memory _name
-        ) public onlyOwner {
+        string memory _name, 
+        uint _maxLimit, 
+        uint _interestPerDay,
+        uint _lockDays,
+        uint _xwinMultiplier) public onlyOwner {
         
         poolInfo.push(PoolInfo({
             name : _name,
+            maxLimit : _maxLimit,
             totalLockedSupply : 0,
             totalInterestPaid : 0,
-            totalXWINPaid : 0
+            totalXWINPaid : 0,
+            interestPerDay : _interestPerDay,
+            lockDays : _lockDays,
+            xwinMultiplier: _xwinMultiplier
         }));
-    }
-    
-    function swapXWINToTokenA(uint _amount) public onlyOwner {
-            
-        address[] memory path = new address[](3);
-        path[0] = xwin;
-        path[1] = pancakeSwapRouter.WETH();
-        path[2] = tokenA;
-        _swapTokenToToken(_amount, xwin, address(this), path);
-    }
-    
-    function swapBToA(uint _amount) public onlyOwner {
-            
-        address[] memory path = new address[](2);
-        path[0] = tokenB;
-        path[1] = tokenA;
-        _swapTokenToToken(_amount, tokenB, address(this), path);
-    }
-    
-    function _swapBToA() internal {
-            
-        uint256 tokenBBalance = IBEP20(tokenB).balanceOf(address(this));
-        address[] memory path = new address[](2);
-        path[0] = tokenB;
-        path[1] = tokenA;
-        _swapTokenToToken(tokenBBalance, tokenB, address(this), path);
-    }
-    
-    function _swapTokenToToken(uint amountIn, address targetToken, address destAddress, address[] memory path) 
-        internal returns (uint) {
-            
-        TransferHelper.safeApprove(targetToken, address(pancakeSwapRouter), amountIn); 
-        uint256[] memory amounts = pancakeSwapRouter.getAmountsOut(amountIn, path);
-        uint256 amountOut = amounts[amounts.length.sub(1)];
-        uint[] memory amountOutput = pancakeSwapRouter.swapExactTokensForTokens(amountIn, amountOut.sub(amountOut.mul(slippage).div(10000)), path, destAddress, block.timestamp);
-        return amountOutput[amountOutput.length - 1];
-    }
-    
-    
-    function getBeforeAfterStakedLPAmount(uint _pid) public view 
-        returns (uint currentBalance, uint origBalance, uint dailyRate, uint blockDiff) {
-        
-        UserInfo memory user = userInfo[_pid][msg.sender];
-        if(user.amount == 0) return (0,0,0,0);
-        currentBalance = getTotalStakedBalance();
-        dailyRate = currentBalance.mul(1e18).div(user.lpTokenStakedAmount).sub(1e18);
-        blockDiff = block.number.sub(user.lastHarvest);
-        return (currentBalance, user.lpTokenStakedAmount, dailyRate, blockDiff);
-    }
-    
-    function getBeforeAfterStakedLPAmountInTokenA(uint _pid) public view returns (uint afterStakedAmount, uint originalStakedAmount) {
-        
-        UserInfo memory user = userInfo[_pid][msg.sender];
-        if(user.amount == 0) return (0,0);
-        uint totalSupply = IBEP20(tokenABLP).totalSupply();
-        uint lpTokenBalance = getTotalStakedBalance();
-        uint ratio = lpTokenBalance.mul(1e18).div(totalSupply);
-        if(ratio == 0) return (0,0);
-        (uint reserveA,  ) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), tokenA, tokenB);
-        afterStakedAmount = reserveA.mul(ratio).div(1e18).mul(2);
-        return (afterStakedAmount, user.amount);
     }
     
     /// @dev user to stake token 
     function stakeToken(uint _pid, uint _amount) external nonReentrant payable {
         
-        require(investorWallet == msg.sender, "not allowed to stake");
+        require(emergency == false, "emergency is on");
+        require(stopDeposit == false, "stop depositing");
         PoolInfo storage pool = poolInfo[_pid];
-        require(IBEP20(tokenA).balanceOf(msg.sender) >= _amount, "Not enough balance");
+        require(pool.totalLockedSupply.add(_amount) <= pool.maxLimit, "exceed offering limit");
+        require(IBEP20(stablecoin).balanceOf(msg.sender) >= _amount, "Not enough balance");
         
-        TransferHelper.safeTransferFrom(tokenA, msg.sender, address(this), _amount);
+        TransferHelper.safeTransferFrom(stablecoin, msg.sender, address(this), _amount);
         UserInfo storage user = userInfo[_pid][msg.sender];
+        require(user.amount == 0, "already deposit");
         
         uint entryAmt = _amount.mul(entryFee).div(10000);
+        TransferHelper.safeTransfer(stablecoin, platformWallet, entryAmt); 
         uint finalDeposit = _amount.sub(entryAmt);
-        TransferHelper.safeTransfer(tokenA, platformWallet, entryAmt); 
-        //perform autofarm staking
-        uint liquidity = _exchangeDepositLP(finalDeposit);
-        user.amount = user.amount.add(finalDeposit);
+        user.amount = finalDeposit;
+        user.farmingStart = block.number;
         user.lastHarvest = block.number;
-        user.lpTokenStakedAmount = getTotalStakedBalance();
-        user.lpTokenAmount = user.lpTokenAmount.add(liquidity);
-
+        uint endDay = pool.lockDays.mul(oneDayBlock);
+        user.lockedEnd = block.number.add(endDay);
+        
+        //keep the address for record later
+        if(userAddress[msg.sender] == false){
+            userAddressArray.push(msg.sender);
+            userAddress[msg.sender] = true;
+        }
+        
+        _depositAlpaca(finalDeposit);
         _mint(address(this), finalDeposit);
         pool.totalLockedSupply = pool.totalLockedSupply.add(finalDeposit);
         
         TransferHelper.safeApprove(address(this), address(_xWinDefi), finalDeposit); 
         _xWinDefi.DepositFarm(xwinpid, finalDeposit);
         _safeSendAuto();
-        
+
         emit _StakeToken(msg.sender, _pid, _amount, finalDeposit);
+    }
+    
+    /// @dev user to unstake token 
+    function unStakeToken(uint _pid) external nonReentrant payable {
+        
+        require(emergency == false, "emergency is on");
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        require(user.amount > 0, "no stake balance found");
+        require(user.lockedEnd <= block.number, "still in locked period");
+        
+        uint withdrawAmt = _getOwnershipStakeAmount(user.amount);
+        
+        //remove from Alpaca
+        _removeAlpaca(withdrawAmt);
+        
+        //withdraw xwin farming 
+        _xWinDefi.WithdrawFarm(xwinpid, user.amount);
+
+        uint xwinrewards = _getxWINRewards(user.amount, user.lockedEnd, user.lastHarvest, pool.xwinMultiplier);
+        uint256 xwinBalance = IBEP20(xwin).balanceOf(address(this));
+        require(xwinBalance >= xwinrewards, "not enough xwin. contact admin");
+        pool.totalXWINPaid = pool.totalXWINPaid.add(xwinrewards);
+        uint burnFeeTotal = xwinrewards.mul(burnFee).div(10000);
+        TransferHelper.safeTransfer(xwin, burnAddress, burnFeeTotal); 
+        TransferHelper.safeTransfer(xwin, msg.sender, xwinrewards.sub(burnFeeTotal));
+
+        
+        _burn(address(this), user.amount);
+        (uint pendingInterest, ) = _entitledInterest(_pid, msg.sender);
+        uint256 usdtBalance = IBEP20(stablecoin).balanceOf(address(this));
+        uint totalReturnToUser = user.amount.add(pendingInterest);
+        require(usdtBalance >= totalReturnToUser, "not enough usdt. contact admin");
+        
+        user.lastHarvest = 0; 
+        user.amount = 0; 
+        pool.totalInterestPaid = pool.totalInterestPaid.add(pendingInterest);
+        pool.totalLockedSupply = pool.totalLockedSupply > user.amount ? pool.totalLockedSupply.sub(user.amount) : 0;
+        
+        TransferHelper.safeTransfer(stablecoin, msg.sender, totalReturnToUser); 
+        
+        _safeSendAuto();
+        
+        emit _UnStakeToken(msg.sender, _pid, totalReturnToUser);
 
     }
     
-    
-    /// @dev user to unstake token 
-    function unStakeToken(uint _pid, uint _amount) external nonReentrant payable {
+    //allow admin to unfarmed from autofarm
+    function emergencyRemoveByAdmin() public onlyOwner {
         
-        require(investorWallet == msg.sender, "not allowed to unstake");
-        PoolInfo storage pool = poolInfo[_pid];
+        require(emergency == true, "only emergency is allow");
+        uint stakedBal = getTotalStakedBalance();
+        _autoFarm.withdraw(autopid, stakedBal);
+    }
+
+    //only trigger by emergency
+    function emergencyRemove(uint _pid) public  {
+        
+        require(emergency == true, "only emergency is allow");
         UserInfo storage user = userInfo[_pid][msg.sender];
-        
-        //remove LP from PCS
-        uint withdrawAmt = getOwnershipStakeAmount(_amount);
-        
-        _removeFromLP(withdrawAmt);
-        _xWinDefi.WithdrawFarm(xwinpid, _amount); //withdraw xwin farming 
-
-        _burn(address(this), _amount);
-
-        uint256 xwinBalance = IBEP20(xwin).balanceOf(address(this));
-        uint burnFeeTotal = xwinBalance.mul(burnFee).div(10000);
-        TransferHelper.safeTransfer(xwin, burnAddress, burnFeeTotal); 
-        TransferHelper.safeTransfer(xwin, msg.sender, xwinBalance.sub(burnFeeTotal));
-        pool.totalXWINPaid = pool.totalXWINPaid.add(xwinBalance);
-        
-        //swap to tokenA and send back to user
-        if(swapTokenB) _swapBToA();
-        
-        uint256 tokenABalance = IBEP20(tokenA).balanceOf(address(this));
-        TransferHelper.safeTransfer(tokenA, msg.sender, tokenABalance); 
-        
-        user.amount = user.amount > _amount? user.amount.sub(_amount) : 0; 
-        user.lpTokenAmount = user.lpTokenAmount > withdrawAmt ? user.lpTokenAmount.sub(withdrawAmt) : 0;
-        user.lastHarvest = block.number;
-        user.lpTokenStakedAmount = getTotalStakedBalance();
-        pool.totalLockedSupply = pool.totalLockedSupply > _amount ? pool.totalLockedSupply.sub(_amount) : 0;
-        
-        //pay as manager profit
-        _safeSendAuto();
-        emit _UnStakeToken(msg.sender, _pid, tokenABalance);
+        require(user.amount > 0, "no balance");
+        _xWinDefi.WithdrawFarm(xwinpid, user.amount);
+        uint256 ibBalance = IBEP20(address(_ibAlpaca)).balanceOf(address(this));
+        uint256 redeemratio = user.amount.mul(1e18).div(totalSupply());
+        uint withdrawAmt = redeemratio.mul(ibBalance).div(1e18);
+        withdrawAmt = ibBalance < withdrawAmt ? ibBalance: withdrawAmt;
+        TransferHelper.safeTransfer(address(_ibAlpaca), msg.sender, withdrawAmt); 
+        _burn(address(this), user.amount);
+        user.lastHarvest = 0; 
+        user.amount = 0; 
+        user.lockedEnd = 0; 
+        user.farmingStart = 0; 
     }
     
     function _safeSendAuto() internal {
         
-        //pay as manager profit
+        //pay to platform
         uint autoBalance = IBEP20(autoaddress).balanceOf(address(this));
         if(autoBalance > 0){
-            uint half = autoBalance.sub(autoBalance.div(2));
-            TransferHelper.safeTransfer(autoaddress, managerWallet, autoBalance.div(2)); 
-            TransferHelper.safeTransfer(autoaddress, platformWallet, half); 
+            TransferHelper.safeTransfer(autoaddress, platformWallet, autoBalance); 
         }
     }
     
-    /// @dev user to unstake token 
-    function harvestXWIN(uint _pid) external nonReentrant payable {
-    
-        require(investorWallet == msg.sender, "not allowed to harvest");
-        _xWinDefi.DepositFarm(xwinpid, 0);
-        PoolInfo storage pool = poolInfo[_pid];
-        uint256 xwinBalance = IBEP20(xwin).balanceOf(address(this));
-        uint burnFeeTotal = xwinBalance.mul(burnFee).div(10000);
-        TransferHelper.safeTransfer(xwin, burnAddress, burnFeeTotal); 
-        TransferHelper.safeTransfer(xwin, msg.sender, xwinBalance.sub(burnFeeTotal));
-        pool.totalXWINPaid = pool.totalXWINPaid.add(xwinBalance);
-        emit _harvestXWIN(msg.sender, xwinBalance);
-    }
-
-    function _exchangeDepositLP(uint _amount) internal returns (uint liquidity) {
+    function _depositAlpaca(uint _amount) internal returns (uint liquidity) {
         
-        uint halfAmt =  _amount.mul(5000).div(10000);
-        address[] memory path = new address[](2);
-        path[0] = tokenA;
-        path[1] = tokenB;
-        uint outputSwap = _swapTokenToToken(halfAmt, tokenA, address(this), path);
-
-        // get quote fixed usdt amount
-        // amountBToGo is usdc
-        uint amountBToGo = _getQuoteAdjusted(halfAmt, outputSwap);
-        (,, liquidity) = _addLiquidity(amountBToGo, halfAmt);
-        TransferHelper.safeApprove(tokenABLP, address(_autoFarm), liquidity); 
+        TransferHelper.safeApprove(stablecoin, address(_ibAlpaca), _amount); 
+        _ibAlpaca.deposit(_amount);
+        liquidity = IBEP20(address(_ibAlpaca)).balanceOf(address(this));
+        TransferHelper.safeApprove(address(_ibAlpaca), address(_autoFarm), liquidity); 
         _autoFarm.deposit(autopid, liquidity);
         return liquidity;
     }
     
-    function _removeFromLP(uint _amount) internal {
+    function _removeAlpaca(uint _amount) internal {
         
         _autoFarm.withdraw(autopid, _amount);
-        uint LPtotalSupply = IBEP20(tokenABLP).totalSupply(); 
-        uint ratio = _amount.mul(1e18).div(LPtotalSupply);
-        uint amountA = 0;
-        uint amountB = 0;
-        
-        (uint  reserveA,  uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), tokenA, tokenB);
-        amountA = reserveA.mul(ratio).div(1e18);
-        amountB = PancakeLibrary.quote(amountA, reserveA, reserveB);
-        
-        uint amtAMin = amountA.sub(amountA.mul(slippage).div(10000));
-        uint amtBMin = amountB.sub(amountB.mul(slippage).div(10000));
-        
-        TransferHelper.safeApprove(tokenABLP, address(pancakeSwapRouter), _amount); 
-        pancakeSwapRouter.removeLiquidity(
-            tokenA,
-            tokenB,
-            _amount,
-            amtAMin,
-            amtBMin, 
-            address(this),
-            block.timestamp
-            );
+        uint256 ibBalance = IBEP20(address(_ibAlpaca)).balanceOf(address(this));
+        _ibAlpaca.withdraw(ibBalance);
+    }
+
+    function entitledInterest(uint _pid) public view returns (uint){
+          
+        (uint entitledInterest_, ) = _entitledInterest(_pid, msg.sender);
+        return entitledInterest_;
     }
     
-    function _getQuotes(uint256 amountA) internal view returns (uint amountB, uint amountOut) {
-        
-        (uint reserveA, uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), tokenA, tokenB);
-        amountOut = PancakeLibrary.getAmountOut(amountA, reserveA, reserveB);
-        amountB = PancakeLibrary.quote(amountA, reserveA, reserveB);
-        return (amountB, amountOut);
-        
-    }
-    
-    function _getQuoteAdjusted(uint amountA, uint swapOutput) internal view returns (uint){
-            
-            (uint amountB, ) = _getQuotes(amountA);
-            return (amountB > swapOutput ? swapOutput:  amountB);
-        } 
-        
-    function _addLiquidity(
-            uint tokenBAmount, 
-            uint tokenAAmount
-            )
-    internal returns (uint amountA_, uint amountB_, uint liquidity) {
-        
-        TransferHelper.safeApprove(tokenB, address(pancakeSwapRouter), tokenBAmount); 
-        TransferHelper.safeApprove(tokenA, address(pancakeSwapRouter), tokenAAmount); 
-        
-        uint tokenAMin = tokenAAmount.sub(tokenAAmount.mul(slippage).div(10000));
-        uint tokenBMin = tokenBAmount.sub(tokenBAmount.mul(slippage).div(10000));
-        (amountA_, amountB_, liquidity) = pancakeSwapRouter.addLiquidity(
-            tokenA,
-            tokenB,
-            tokenAAmount,
-            tokenBAmount,
-            tokenAMin,
-            tokenBMin, 
-            address(this),
-            block.timestamp
-            );
-            
-        return (amountA_, amountB_, liquidity);
-            
+    // one day interest calc
+    function _entitledInterest(uint _pid, address _user) internal view returns (uint entitledInterest_, uint lastHarvest){
+          
+        PoolInfo memory pool = poolInfo[_pid];
+        UserInfo memory user = userInfo[_pid][_user];
+        uint maxBlock = block.number >= user.lockedEnd? user.lockedEnd: block.number;
+        if(maxBlock < user.lastHarvest) return (user.unClaimBalance, maxBlock);
+        uint diff = maxBlock.sub(user.lastHarvest);
+        uint rounded = diff.div(oneDayBlock);
+        if(rounded == 0) return (user.unClaimBalance, user.lastHarvest);
+        uint modBlock = diff.mod(oneDayBlock);
+        uint entitled = pool.interestPerDay.mul(user.amount).mul(rounded).div(1000000);
+        entitledInterest_ = user.unClaimBalance.add(entitled);
+        return (entitledInterest_, block.number.sub(modBlock));
     }
 }
