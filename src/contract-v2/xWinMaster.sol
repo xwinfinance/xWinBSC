@@ -508,7 +508,7 @@ library PancakeLibrary {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66' // init code hash
+                hex'00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5' // init code hash
             ))));
     }
 
@@ -531,9 +531,9 @@ library PancakeLibrary {
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
         require(amountIn > 0, 'PancakeLibrary: INSUFFICIENT_INPUT_AMOUNT');
         require(reserveIn > 0 && reserveOut > 0, 'PancakeLibrary: INSUFFICIENT_LIQUIDITY');
-        uint amountInWithFee = amountIn.mul(998);
+        uint amountInWithFee = amountIn.mul(9975);
         uint numerator = amountInWithFee.mul(reserveOut);
-        uint denominator = reserveIn.mul(1000).add(amountInWithFee);
+        uint denominator = reserveIn.mul(10000).add(amountInWithFee);
         amountOut = numerator / denominator;
     }
 
@@ -541,8 +541,8 @@ library PancakeLibrary {
     function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) internal pure returns (uint amountIn) {
         require(amountOut > 0, 'PancakeLibrary: INSUFFICIENT_OUTPUT_AMOUNT');
         require(reserveIn > 0 && reserveOut > 0, 'PancakeLibrary: INSUFFICIENT_LIQUIDITY');
-        uint numerator = reserveIn.mul(amountOut).mul(1000);
-        uint denominator = reserveOut.sub(amountOut).mul(998);
+        uint numerator = reserveIn.mul(amountOut).mul(10000);
+        uint denominator = reserveOut.sub(amountOut).mul(9975);
         amountIn = (numerator / denominator).add(1);
     }
 
@@ -571,58 +571,46 @@ library PancakeLibrary {
 
 contract xWinMaster is Ownable {
     
+    using SafeMath for uint256;
     string public name;
-    address private deployeraddress;
     IStdReference chainPricesFeed;
     IPancakeRouter02 pancakeSwapRouter;
     
     mapping(address => bool) public pancakePriceToken;
     mapping(address => string) public TokenNames;
-    mapping(address => address) public PriceFeeds;
     address private PancakeRouterV2;
-    address private priceFeedAddress;
 
     constructor(
         address _routerAddress,
         address _priceFeedAddress
         ) public {
         name = "xWin Master";
-        deployeraddress = msg.sender;
         PancakeRouterV2 = address(_routerAddress);
-        priceFeedAddress = address(_routerAddress);
         chainPricesFeed = IStdReference(_priceFeedAddress);
         pancakeSwapRouter = IPancakeRouter02(_routerAddress);
     }
     
-    /// @dev return aave and chainlink price address
-    function getPriceFeedAddress() external view returns (
-            address priceFeedaddress){
-         return priceFeedAddress;
-    }
-    
-    /// @dev return aave and chainlink price address
     function getTokenName(address _tokenaddress) external view returns (
             string memory tokenname){
          return TokenNames[_tokenaddress];
     }
     
     /// @dev return BscRouterV2 address
+    function getPancakeRouter() external view returns (IPancakeRouter02 pancakeRouter){
+         return pancakeSwapRouter;
+    }
+
     function getRouterAddress() external view returns (address ){
          return PancakeRouterV2;
     }
 
-    /// @dev return aave and chainlink price address
-    function updateTokenNames(
-        address[] calldata underlyingAddress, 
-        string[] calldata tokennames) external onlyOwner {
-        
+    function updateTokenNames(address[] calldata underlyingAddress, string[] calldata tokennames) external onlyOwner {
         for (uint i = 0; i < underlyingAddress.length; i++) {
             TokenNames[underlyingAddress[i]] = tokennames[i];
         }
     }
     
     function addPancakePriceToken(string [] memory _tokenname, address[] calldata _addressToken, bool [] memory _usePancake) public onlyOwner {
-        
         for (uint i = 0; i < _tokenname.length; i++) {
             pancakePriceToken[_addressToken[i]] = _usePancake[i];
         }
@@ -630,6 +618,19 @@ contract xWinMaster is Ownable {
     
     function _getTokenName(address _tokenaddress) internal view returns (string memory tokenname){
          return TokenNames[_tokenaddress];
+    }
+
+    function getPriceByAllAddress(address _from, address _to) external view returns (uint rate){
+        
+        if(pancakePriceToken[_from] == true){
+            rate = getPancakePrice(_from, _to);
+        }else{
+            string memory fromToken = TokenNames[_from];
+            string memory toToken = TokenNames[_to];
+            IStdReference.ReferenceData memory data = chainPricesFeed.getReferenceData(fromToken, toToken);
+            rate = data.rate;
+        }
+        return rate;
     }
 
     function getPriceByAddress(address _targetAdd, string memory _toTokenName) external view returns (uint rate){
@@ -649,16 +650,29 @@ contract xWinMaster is Ownable {
         return data.rate;
     }
     
-    function getQuotes(
-        address targetToken
-    ) public view 
-        returns (uint amountOutB, uint amountOutA) {
+    function getQuotes(address targetToken) public view returns (uint amountOutB, uint amountOutA) {
         
         (uint reserveA, uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), targetToken, pancakeSwapRouter.WETH());
         amountOutB = PancakeLibrary.quote(1e18, reserveA, reserveB);
         amountOutA = PancakeLibrary.quote(1e18, reserveB, reserveA);
-        
         return (amountOutB, amountOutA);
+    }
+
+    function getPancakePrice(address _from, address _to) public view returns (uint amountOut) {
         
+        address[] memory path;
+        if(_to == pancakeSwapRouter.WETH() || _from == pancakeSwapRouter.WETH()){
+            path = new address[](2);
+            path[0] = _from;
+            path[1] = _to;
+        }else{
+            path = new address[](3);
+            path[0] = _from;
+            path[1] = pancakeSwapRouter.WETH();
+            path[2] = _to;
+        }
+        uint256[] memory amounts = pancakeSwapRouter.getAmountsOut(1e18, path);
+        amountOut = amounts[amounts.length.sub(1)];
+        return amountOut;
     }
 }
