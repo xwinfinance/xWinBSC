@@ -1075,6 +1075,9 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
         uint lastHarvest; 
     }
     
+    uint public referralFeeOnProfit = 0; 
+    uint public managerFeeOnProfit = 500; 
+    uint public platformFeeOnProfit = 500; 
     uint public entryFee = 10; 
     uint public burnFee = 250; 
     mapping (uint256 => mapping (address => UserInfo)) public userInfo;
@@ -1086,6 +1089,7 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
     address public investorWallet; 
     address public managerWallet; 
     address public platformWallet;
+    address public referralWallet;
     address public burnAddress = address(0x000000000000000000000000000000000000dEaD);
     
     AutoFarm _autoFarm = AutoFarm(address(0x0895196562C7868C5Be92459FaE7f877ED450452));
@@ -1110,6 +1114,7 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
             address _investorWallet,
             address _managerWallet,
             address _platformWallet,
+            address _referralWallet,
             uint _autopid
             
         ) public BEP20(name, symbol) {
@@ -1117,6 +1122,7 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
             investorWallet = _investorWallet;
             managerWallet = _managerWallet;
             platformWallet = _platformWallet;
+            referralWallet = _referralWallet;
             autopid = _autopid;
         }
         
@@ -1160,9 +1166,12 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
         xwinpid = _xwinpid;
     }
     
-    function updateFee(uint _burnFee, uint _entryFee) public onlyOwner {
+    function updateFee(uint _burnFee, uint _entryFee, uint _managerFeeOnProfit, uint _referralFeeOnProfit, uint _platformFeeOnProfit) public onlyOwner {
         burnFee = _burnFee;
         entryFee = _entryFee;
+        managerFeeOnProfit = _managerFeeOnProfit;
+        referralFeeOnProfit = _referralFeeOnProfit;
+        platformFeeOnProfit = _platformFeeOnProfit;
     }
 
     function updateInvestorWallet(address _investorWallet) public onlyOwner {
@@ -1177,6 +1186,10 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
         platformWallet = _platformWallet;
     }
     
+    function updateReferralWallet(address _referralWallet) public onlyOwner {
+        referralWallet = _referralWallet;
+    }
+
     //allow admin to move unncessary token inside the contract
     function adminMoveToken(address _tokenAddress) public onlyOwner {
         uint256 tokenBal = IBEP20(_tokenAddress).balanceOf(address(this));
@@ -1255,6 +1268,10 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
         require(IBEP20(tokenA).balanceOf(msg.sender) >= _amount, "Not enough balance");
         
         TransferHelper.safeTransferFrom(tokenA, msg.sender, address(this), _amount);
+        
+        //process manager and referralFee
+        _processManagerFee(_pid);
+
         UserInfo storage user = userInfo[_pid][msg.sender];
         
         uint entryAmt = _amount.mul(entryFee).div(10000);
@@ -1273,7 +1290,7 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
         
         TransferHelper.safeApprove(address(this), address(_xWinDefi), finalDeposit); 
         _xWinDefi.DepositFarm(xwinpid, finalDeposit);
-        _safeSendAuto();
+        //_safeSendAuto();
         
         emit _StakeToken(msg.sender, _pid, _amount, finalDeposit);
 
@@ -1287,6 +1304,9 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         
+        //process manager and referralFee
+        _processManagerFee(_pid);
+
         //remove LP from PCS
         uint withdrawAmt = getOwnershipStakeAmount(_amount);
         
@@ -1313,7 +1333,7 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
         pool.totalLockedSupply = pool.totalLockedSupply > _amount ? pool.totalLockedSupply.sub(_amount) : 0;
         
         //pay as manager profit
-        _safeSendAuto();
+        //_safeSendAuto();
         emit _UnStakeToken(msg.sender, _pid, tokenABalance);
     }
     
@@ -1356,9 +1376,27 @@ contract xWINPrivateAlpacaStablecoin is ReentrancyGuard, IBEP20, BEP20 {
         TransferHelper.safeTransfer(xwin, burnAddress, burnFeeTotal); 
         TransferHelper.safeTransfer(xwin, msg.sender, xwinBalance.sub(burnFeeTotal));
         pool.totalXWINPaid = pool.totalXWINPaid.add(xwinBalance);
-        _safeSendAuto();
+        _autoFarm.withdraw(autopid, 0);
+        //_safeSendAuto();
         emit _harvestXWIN(msg.sender, xwinBalance);
     }
 
-
+    function _processManagerFee(uint _pid) internal {
+    
+        (uint afterBalance, uint beforeBalance, , ) = getBeforeAfterStakedLPAmount(_pid);
+        uint profit = afterBalance.sub(beforeBalance);
+        if(profit == 0) return;
+        uint referralFee =  0;
+        uint managerFee = 0;
+        uint platformFee = 0;
+        if(managerFeeOnProfit > 0) managerFee = profit.mul(managerFeeOnProfit).div(10000);
+        if(platformFeeOnProfit > 0) platformFee = profit.mul(platformFeeOnProfit).div(10000);
+        if(referralFeeOnProfit > 0) referralFee = profit.mul(referralFeeOnProfit).div(10000);
+        
+        _removeAlpaca(managerFee.add(referralFee).add(platformFee));
+        
+        if(managerFee > 0) TransferHelper.safeTransfer(tokenA, managerWallet, managerFee); 
+        if(platformFee > 0) TransferHelper.safeTransfer(tokenA, platformWallet, platformFee); 
+        if(referralFee > 0) TransferHelper.safeTransfer(tokenA, referralWallet, referralFee); 
+    }
 }
