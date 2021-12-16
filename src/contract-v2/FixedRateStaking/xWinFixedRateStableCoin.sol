@@ -1327,10 +1327,10 @@ contract xWinFixedRateStableCoin is ReentrancyGuard, IBEP20, BEP20 {
         uint totalReturnToUser = user.amount.add(pendingInterest);
         require(usdtBalance >= totalReturnToUser, "not enough usdt. contact admin");
         
+        pool.totalLockedSupply = pool.totalLockedSupply > user.amount ? pool.totalLockedSupply.sub(user.amount) : 0;
+        pool.totalInterestPaid = pool.totalInterestPaid.add(pendingInterest);
         user.lastHarvest = 0; 
         user.amount = 0; 
-        pool.totalInterestPaid = pool.totalInterestPaid.add(pendingInterest);
-        pool.totalLockedSupply = pool.totalLockedSupply > user.amount ? pool.totalLockedSupply.sub(user.amount) : 0;
         
         TransferHelper.safeTransfer(stablecoin, msg.sender, totalReturnToUser); 
         
