@@ -660,13 +660,11 @@ contract xWinCharity is ReentrancyGuard, Ownable {
     address public xwin = address(0xa83575490D7df4E2F47b7D38ef351a2722cA45b9);
 
     address public charityOwnerWallet; 
-    address public managerWallet; 
-    address public platformWallet;
     address public burnAddress = address(0x000000000000000000000000000000000000dEaD);
     
     //xWinDefi _xWinDefi = xWinDefi(address(0x1Bf7fe7568211ecfF68B6bC7CCAd31eCd8fe8092));
     // main net
-    //xWinDefi _xWinDefi = xWinDefi(address(0x21B323a2Ac030095A7f9509B3b53f52367B76D94));
+    //xWinDefi _xWinDefi = xWinDefi(address(0xebAee150352ba99FcA309C9D57E14DC77736470e));
     //test net
     xWinDefi _xWinDefi = xWinDefi(address(0xebAee150352ba99FcA309C9D57E14DC77736470e));
     uint public xwinpid = 0;
@@ -742,7 +740,10 @@ contract xWinCharity is ReentrancyGuard, Ownable {
     function harvestByCharityOwner() external onlyCharityOwner {
         _xWinDefi.DepositFarm(xwinpid, 0);
         uint256 xwinBalance = IBEP20(xwin).balanceOf(address(this));
-        TransferHelper.safeTransfer(xwin, charityOwnerWallet, xwinBalance);
+        uint burnAmount = xwinBalance.mul(burnFee).div(10000);
+        uint finalAmount = xwinBalance.sub(burnAmount);
+        TransferHelper.safeTransfer(xwin, burnAddress, burnAmount); 
+        TransferHelper.safeTransfer(xwin, charityOwnerWallet, finalAmount);
         totalHavestAmount = totalHavestAmount.add(xwinBalance);
         emit _harvestXWIN(charityOwnerWallet, xwinBalance);
     }
@@ -757,6 +758,11 @@ contract xWinCharity is ReentrancyGuard, Ownable {
     function updateProperty(uint _burnFee, uint _xwinpid) public onlyOwner {
         burnFee = _burnFee;
         xwinpid = _xwinpid;
+    }
+
+    function updateAddresses(address _charityOwnerWallet, address _xwinDefiaddress) public onlyOwner {
+        charityOwnerWallet = _charityOwnerWallet;
+        _xWinDefi = xWinDefi(_xwinDefiaddress);
     }
 
     //allow admin to move unncessary token inside the contract
