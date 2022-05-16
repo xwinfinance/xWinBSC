@@ -21,18 +21,6 @@ contract Context {
     }
 }
 
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
 contract Ownable is Context {
     address private _owner;
 
@@ -93,16 +81,7 @@ contract Ownable is Context {
 }
 
 library SafeMath {
-    /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     *
-     * - Addition cannot overflow.
-     */
+    
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         require(c >= a, 'SafeMath: addition overflow');
@@ -110,30 +89,11 @@ library SafeMath {
         return c;
     }
 
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return sub(a, b, 'SafeMath: subtraction overflow');
     }
 
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
+
     function sub(
         uint256 a,
         uint256 b,
@@ -145,16 +105,6 @@ library SafeMath {
         return c;
     }
 
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
         // benefit is lost if 'b' is also tested.
@@ -169,34 +119,10 @@ library SafeMath {
         return c;
     }
 
-    /**
-     * @dev Returns the integer division of two unsigned integers. Reverts on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         return div(a, b, 'SafeMath: division by zero');
     }
 
-    /**
-     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
     function div(
         uint256 a,
         uint256 b,
@@ -209,34 +135,10 @@ library SafeMath {
         return c;
     }
 
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
     function mod(uint256 a, uint256 b) internal pure returns (uint256) {
         return mod(a, b, 'SafeMath: modulo by zero');
     }
 
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * Reverts with custom message when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
     function mod(
         uint256 a,
         uint256 b,
@@ -269,23 +171,7 @@ library SafeMath {
  * @dev Collection of functions related to the address type
  */
 library Address {
-    /**
-     * @dev Returns true if `account` is a contract.
-     *
-     * [IMPORTANT]
-     * ====
-     * It is unsafe to assume that an address for which this function returns
-     * false is an externally-owned account (EOA) and not a contract.
-     *
-     * Among others, `isContract` will return false for the following
-     * types of addresses:
-     *
-     *  - an externally-owned account
-     *  - a contract in construction
-     *  - an address where a contract will be created
-     *  - an address where a contract lived, but was destroyed
-     * ====
-     */
+    
     function isContract(address account) internal view returns (bool) {
         // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
         // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
@@ -299,22 +185,6 @@ library Address {
         return (codehash != accountHash && codehash != 0x0);
     }
 
-    /**
-     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
-     * `recipient`, forwarding all available gas and reverting on errors.
-     *
-     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
-     * of certain opcodes, possibly making contracts go over the 2300 gas limit
-     * imposed by `transfer`, making them unable to receive funds via
-     * `transfer`. {sendValue} removes this limitation.
-     *
-     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].
-     *
-     * IMPORTANT: because control is transferred to `recipient`, care must be
-     * taken to not create reentrancy vulnerabilities. Consider using
-     * {ReentrancyGuard} or the
-     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
-     */
     function sendValue(address payable recipient, uint256 amount) internal {
         require(address(this).balance >= amount, 'Address: insufficient balance');
 
@@ -323,34 +193,10 @@ library Address {
         require(success, 'Address: unable to send value, recipient may have reverted');
     }
 
-    /**
-     * @dev Performs a Solidity function call using a low level `call`. A
-     * plain`call` is an unsafe replacement for a function call: use this
-     * function instead.
-     *
-     * If `target` reverts with a revert reason, it is bubbled up by this
-     * function (like regular Solidity function calls).
-     *
-     * Returns the raw returned data. To convert to the expected return value,
-     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
-     *
-     * Requirements:
-     *
-     * - `target` must be a contract.
-     * - calling `target` with `data` must not revert.
-     *
-     * _Available since v3.1._
-     */
     function functionCall(address target, bytes memory data) internal returns (bytes memory) {
         return functionCall(target, data, 'Address: low-level call failed');
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with
-     * `errorMessage` as a fallback revert reason when `target` reverts.
-     *
-     * _Available since v3.1._
-     */
     function functionCall(
         address target,
         bytes memory data,
@@ -359,17 +205,6 @@ library Address {
         return _functionCallWithValue(target, data, 0, errorMessage);
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but also transferring `value` wei to `target`.
-     *
-     * Requirements:
-     *
-     * - the calling contract must have an ETH balance of at least `value`.
-     * - the called Solidity function must be `payable`.
-     *
-     * _Available since v3.1._
-     */
     function functionCallWithValue(
         address target,
         bytes memory data,
@@ -378,12 +213,6 @@ library Address {
         return functionCallWithValue(target, data, value, 'Address: low-level call with value failed');
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but
-     * with `errorMessage` as a fallback revert reason when `target` reverts.
-     *
-     * _Available since v3.1._
-     */
     function functionCallWithValue(
         address target,
         bytes memory data,
@@ -643,17 +472,7 @@ library TransferHelper {
 
 
 contract ReentrancyGuard {
-    // Booleans are more expensive than uint256 or any type that takes up a full
-    // word because each write operation emits an extra SLOAD to first read the
-    // slot's contents, replace the bits taken up by the boolean, and then write
-    // back. This is the compiler's defense against contract upgrades and
-    // pointer aliasing, and it cannot be disabled.
-
-    // The values being non-zero value makes deployment a bit more expensive,
-    // but in exchange the refund on every call to nonReentrant will be lower in
-    // amount. Since refunds are capped to a percentage of the total
-    // transaction's gas, it is best to keep them low in cases like this one, to
-    // increase the likelihood of the full refund coming into effect.
+    
     uint256 private constant _NOT_ENTERED = 1;
     uint256 private constant _ENTERED = 2;
 
@@ -663,13 +482,6 @@ contract ReentrancyGuard {
         _status = _NOT_ENTERED;
     }
 
-    /**
-     * @dev Prevents a contract from calling itself, directly or indirectly.
-     * Calling a `nonReentrant` function from another `nonReentrant`
-     * function is not supported. It is possible to prevent this from happening
-     * by making the `nonReentrant` function external, and make it call a
-     * `private` function that does the actual work.
-     */
     modifier nonReentrant() {
         // On the first call to nonReentrant, _notEntered will be true
         require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
@@ -683,27 +495,6 @@ contract ReentrancyGuard {
         // https://eips.ethereum.org/EIPS/eip-2200)
         _status = _NOT_ENTERED;
     }
-}
-
-interface IStdReference {
-    /// A structure returned whenever someone requests for standard reference data.
-    struct ReferenceData {
-        uint256 rate; // base/quote exchange rate, multiplied by 1e18.
-        uint256 lastUpdatedBase; // UNIX epoch of the last time when base price gets updated.
-        uint256 lastUpdatedQuote; // UNIX epoch of the last time when quote price gets updated.
-    }
-
-    /// Returns the price data for the given base/quote pair. Revert if not available.
-    function getReferenceData(string memory _base, string memory _quote)
-        external
-        view
-        returns (ReferenceData memory);
-
-    /// Similar to getReferenceData, but with multiple base/quote pairs at once.
-    function getReferenceDataBulk(string[] memory _bases, string[] memory _quotes)
-        external
-        view
-        returns (ReferenceData[] memory);
 }
 
 contract AutoFarm  {
@@ -723,13 +514,7 @@ contract AutoFarm  {
         returns (uint256){}
 }
 
-contract iUSDT  {
-    function mint(address to, uint256 value) public {}
-    function burn(address _from, uint256 _amount) public {}
-    uint public tokenPrice;
-}
-
-interface IPancakeRouter01 {
+interface IPancakeRouter02 {
     function factory() external pure returns (address);
     function WETH() external pure returns (address);
 
@@ -823,96 +608,8 @@ interface IPancakeRouter01 {
     function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
 }
 
-interface IPancakeRouter02 is IPancakeRouter01 {
-    function removeLiquidityETHSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountETH);
-    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountETH);
-
-    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-    function swapExactETHForTokensSupportingFeeOnTransferTokens(
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable;
-    function swapExactTokensForETHSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-}
-
-interface IPancakePair {
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
-
-    function name() external pure returns (string memory);
-    function symbol() external pure returns (string memory);
-    function decimals() external pure returns (uint8);
-    function totalSupply() external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    function allowance(address owner, address spender) external view returns (uint);
-
-    function approve(address spender, uint value) external returns (bool);
-    function transfer(address to, uint value) external returns (bool);
-    function transferFrom(address from, address to, uint value) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-    function nonces(address owner) external view returns (uint);
-
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-
-    event Mint(address indexed sender, uint amount0, uint amount1);
-    event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
-    event Swap(
-        address indexed sender,
-        uint amount0In,
-        uint amount1In,
-        uint amount0Out,
-        uint amount1Out,
-        address indexed to
-    );
-    event Sync(uint112 reserve0, uint112 reserve1);
-
-    function MINIMUM_LIQUIDITY() external pure returns (uint);
-    function factory() external view returns (address);
-    function token0() external view returns (address);
-    function token1() external view returns (address);
+interface IPancakePair {    
     function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-    function price0CumulativeLast() external view returns (uint);
-    function price1CumulativeLast() external view returns (uint);
-    function kLast() external view returns (uint);
-
-    function mint(address to) external returns (uint liquidity);
-    function burn(address to) external returns (uint amount0, uint amount1);
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-    function skim(address to) external;
-    function sync() external;
-
-    function initialize(address, address) external;
 }
 
 library PancakeLibrary {
@@ -1338,32 +1035,27 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         uint lastHarvest; 
     }
     
-    uint public referralFeeOnProfit = 0; 
-    uint public managerFeeOnProfit = 0; 
-    uint public platformFeeOnProfit = 50; 
+    uint public platformFeeOnProfit = 100; 
     bool public swapTokenB = true; 
     uint public slippage = 50; 
     uint public entryFee = 10; 
-    uint public burnFee = 250; 
+    uint public burnFee = 500; 
     mapping (uint256 => mapping (address => UserInfo)) public userInfo;
     PoolInfo[] public poolInfo;
-    address public tokenB;
-    address public tokenA; 
-    address public autoaddress = address(0xa184088a740c695E156F91f5cC086a06bb78b827);
-    address public tokenABLP;
+    address public tokenB = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
+    address public tokenA = address(0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47); 
+    address public tokenABLP = address(0x28415ff2C35b65B9E5c7de82126b4015ab9d031F);
     address public xwin = address(0xd88ca08d8eec1E9E09562213Ae83A7853ebB5d28);
-    address public investorWallet; 
-    address public managerWallet; 
-    address public platformWallet;
-    address public referralWallet;
+    address public investorWallet = address(0x5D450b7A2bAFbc071cF1313099C3744f91c3BC24);
+    address public platformWallet = address(0x62691eF999C7F07BC1653416df0eC4f3CDDBb0c7);
     address public burnAddress = address(0x000000000000000000000000000000000000dEaD);
     
-    AutoFarm _autoFarm = AutoFarm(address(0x0895196562C7868C5Be92459FaE7f877ED450452));
-    IPancakeRouter02 pancakeSwapRouter = IPancakeRouter02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
-    xWinDefi _xWinDefi = xWinDefi(address(0x1Bf7fe7568211ecfF68B6bC7CCAd31eCd8fe8092));
+    AutoFarm public _autoFarm = AutoFarm(address(0x0895196562C7868C5Be92459FaE7f877ED450452));
+    IPancakeRouter02 public pancakeSwapRouter = IPancakeRouter02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+    xWinDefi public _xWinDefi = xWinDefi(address(0x1Bf7fe7568211ecfF68B6bC7CCAd31eCd8fe8092));
     
     
-    uint public autopid; 
+    uint public autopid = 621; 
     uint public xwinpid = 0;
     
     event Received(address, uint);
@@ -1374,26 +1066,8 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
 
     constructor (
             string memory name,
-            string memory symbol,
-            address _tokenA,
-            address _tokenB,
-            address _tokenABLP,
-            address _investorWallet,
-            address _managerWallet,
-            address _platformWallet,
-            address _referralWallet,
-            uint _autopid
-            
-        ) public BEP20(name, symbol) {
-            tokenA = _tokenA;
-            tokenB = _tokenB;
-            tokenABLP = _tokenABLP;
-            investorWallet = _investorWallet;
-            managerWallet = _managerWallet;
-            platformWallet = _platformWallet;
-            referralWallet = _referralWallet;
-            autopid = _autopid;
-        }
+            string memory symbol            
+        ) public BEP20(name, symbol) {}
         
     
     receive() external payable {
@@ -1418,58 +1092,29 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         _xWinDefi = xWinDefi(xWinDefi_);
     }
 
-    function updateTokenAddresses(
-        address _tokenB,
-        address _tokenA,
-        address _autoaddress,
-        address _tokenABLP,
-        address _xwin
-        ) public onlyOwner {
-        
-        tokenB = _tokenB;
-        tokenA = _tokenA;
-        autoaddress = _autoaddress;
-        tokenABLP = _tokenABLP;
-        xwin = _xwin;
-    }
-
-    function updateSwapFlag(bool _swapTokenB) public onlyOwner {
-        swapTokenB = _swapTokenB;
-    }
-    
     // update xwin farming pool id
     function updateXWINid(uint _xwinpid) public onlyOwner {
         xwinpid = _xwinpid;
     }
     
-    function updateFee(uint _burnFee, uint _entryFee, uint _managerFeeOnProfit, uint _referralFeeOnProfit, uint _platformFeeOnProfit) public onlyOwner {
-        burnFee = _burnFee;
-        entryFee = _entryFee;
-        managerFeeOnProfit = _managerFeeOnProfit;
-        referralFeeOnProfit = _referralFeeOnProfit;
-        platformFeeOnProfit = _platformFeeOnProfit;
-    }
-
-
     function updateSlippage(uint _slippage) public onlyOwner {
         slippage = _slippage;
     }
-    
-    function updateInvestorWallet(address _investorWallet) public onlyOwner {
-        investorWallet = _investorWallet;
+
+    function updateFee(uint _burnFee, uint _entryFee, uint _platformFeeOnProfit) public onlyOwner {
+        burnFee = _burnFee;
+        entryFee = _entryFee;
+        platformFeeOnProfit = _platformFeeOnProfit;
     }
 
-    function updateManagerWallet(address _managerWallet) public onlyOwner {
-        managerWallet = _managerWallet;
+    function updateInvestorWallet(address _investorWallet) public onlyOwner {
+        investorWallet = _investorWallet;
     }
 
     function updateplatformWallet(address _platformWallet) public onlyOwner {
         platformWallet = _platformWallet;
     }
     
-    function updateReferralWallet(address _referralWallet) public onlyOwner {
-        referralWallet = _referralWallet;
-    }
     //allow admin to move unncessary token inside the contract
     function adminMoveToken(address _tokenAddress) public onlyOwner {
         uint256 tokenBal = IBEP20(_tokenAddress).balanceOf(address(this));
@@ -1481,14 +1126,6 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         
         uint stakedBal = getTotalStakedBalance();
         _autoFarm.withdraw(autopid, stakedBal);
-    }
-    
-    function getNumberOfPools() public view returns (uint) {
-        return poolInfo.length;
-    }
-
-    function getTotalPendingAUTO() public view returns (uint){
-        return _autoFarm.pendingAUTO(autopid, address(this));
     }
     
     function getTotalStakedBalance() public view returns (uint){
@@ -1516,40 +1153,37 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         }));
     }
     
-    function swapXWINToTokenA(uint _amount) public onlyOwner {
-            
-        address[] memory path = new address[](3);
-        path[0] = xwin;
-        path[1] = pancakeSwapRouter.WETH();
-        path[2] = tokenA;
-        _swapTokenToToken(_amount, xwin, address(this), path);
-    }
-    
-    function swapBToA(uint _amount) public onlyOwner {
-            
-        address[] memory path = new address[](2);
-        path[0] = tokenB;
-        path[1] = tokenA;
-        _swapTokenToToken(_amount, tokenB, address(this), path);
-    }
-    
-    function _swapBToA() internal {
-            
-        uint256 tokenBBalance = IBEP20(tokenB).balanceOf(address(this));
-        address[] memory path = new address[](2);
-        path[0] = tokenB;
-        path[1] = tokenA;
-        _swapTokenToToken(tokenBBalance, tokenB, address(this), path);
-    }
-    
-    function _swapTokenToToken(uint amountIn, address targetToken, address destAddress, address[] memory path) 
+    function _swapTokenToETH(uint amountIn) 
         internal returns (uint) {
             
-        TransferHelper.safeApprove(targetToken, address(pancakeSwapRouter), amountIn); 
+        address[] memory path = new address[](2);
+        path[0] = tokenA;
+        path[1] = pancakeSwapRouter.WETH();
+
+        TransferHelper.safeApprove(tokenA, address(pancakeSwapRouter), amountIn); 
         uint256[] memory amounts = pancakeSwapRouter.getAmountsOut(amountIn, path);
         uint256 amountOut = amounts[amounts.length.sub(1)];
-        uint[] memory amountOutput = pancakeSwapRouter.swapExactTokensForTokens(amountIn, amountOut.sub(amountOut.mul(slippage).div(10000)), path, destAddress, block.timestamp);
+        uint[] memory amountOutput = pancakeSwapRouter.swapExactTokensForETH(amountIn, amountOut.sub(amountOut.mul(slippage).div(10000)), path, address(this), block.timestamp);
+		
         return amountOutput[amountOutput.length - 1];
+    }
+
+    function _swapETHToToken() 
+        internal returns (uint) {
+
+        uint bnbBal = address(this).balance;
+        address[] memory path = new address[](2);
+        path[0] = pancakeSwapRouter.WETH();
+        path[1] = tokenA;
+
+        uint256[] memory amounts = pancakeSwapRouter.getAmountsOut(bnbBal, path);
+        uint256 amountOut = amounts[amounts.length-1];
+        pancakeSwapRouter.swapExactETHForTokens{value: bnbBal}(
+            amountOut.sub((amountOut.mul(slippage).div(10000))), 
+            path, 
+            address(this), 
+            block.timestamp
+        );                
     }
     
     
@@ -1559,7 +1193,7 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         UserInfo memory user = userInfo[_pid][msg.sender];
         if(user.amount == 0) return (0,0,0,0);
         currentBalance = getTotalStakedBalance();
-        dailyRate = currentBalance.mul(1e18).div(user.lpTokenStakedAmount).sub(1e18);
+        dailyRate = currentBalance == user.lpTokenStakedAmount ? 0 : currentBalance.mul(1e18).div(user.lpTokenStakedAmount).sub(1e18);
         blockDiff = block.number.sub(user.lastHarvest);
         return (currentBalance, user.lpTokenStakedAmount, dailyRate, blockDiff);
     }
@@ -1572,7 +1206,7 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         uint lpTokenBalance = getTotalStakedBalance();
         uint ratio = lpTokenBalance.mul(1e18).div(totalSupply);
         if(ratio == 0) return (0,0);
-        (uint reserveA,  ) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), tokenA, tokenB);
+        (uint reserveA,  ) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), tokenA, pancakeSwapRouter.WETH());
         afterStakedAmount = reserveA.mul(ratio).div(1e18).mul(2);
         return (afterStakedAmount, user.amount);
     }
@@ -1595,7 +1229,7 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         uint finalDeposit = _amount.sub(entryAmt);
         TransferHelper.safeTransfer(tokenA, platformWallet, entryAmt); 
         //perform autofarm staking
-        uint liquidity = _exchangeDepositLP(finalDeposit);
+        uint liquidity = _exchangeDepositLP();
         user.amount = user.amount.add(finalDeposit);
         user.lastHarvest = block.number;
         user.lpTokenStakedAmount = getTotalStakedBalance();
@@ -1606,12 +1240,9 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         
         TransferHelper.safeApprove(address(this), address(_xWinDefi), finalDeposit); 
         _xWinDefi.DepositFarm(xwinpid, finalDeposit);
-        _safeSendAuto();
         
         emit _StakeToken(msg.sender, _pid, _amount, finalDeposit);
-
     }
-    
     
     /// @dev user to unstake token 
     function unStakeToken(uint _pid, uint _amount) external nonReentrant payable {
@@ -1632,14 +1263,16 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         _burn(address(this), _amount);
 
         uint256 xwinBalance = IBEP20(xwin).balanceOf(address(this));
-        uint burnFeeTotal = xwinBalance.mul(burnFee).div(10000);
-        TransferHelper.safeTransfer(xwin, burnAddress, burnFeeTotal); 
-        TransferHelper.safeTransfer(xwin, msg.sender, xwinBalance.sub(burnFeeTotal));
-        pool.totalXWINPaid = pool.totalXWINPaid.add(xwinBalance);
+        if(xwinBalance > 0){
+            uint burnFeeTotal = xwinBalance.mul(burnFee).div(10000);
+            TransferHelper.safeTransfer(xwin, burnAddress, burnFeeTotal); 
+            TransferHelper.safeTransfer(xwin, msg.sender, xwinBalance.sub(burnFeeTotal));
+            pool.totalXWINPaid = pool.totalXWINPaid.add(xwinBalance);
+        }
         
         //swap to tokenA and send back to user
-        if(swapTokenB) _swapBToA();
-        
+        if(swapTokenB) _swapETHToToken();
+
         uint256 tokenABalance = IBEP20(tokenA).balanceOf(address(this));
         TransferHelper.safeTransfer(tokenA, msg.sender, tokenABalance); 
         
@@ -1649,21 +1282,9 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         user.lpTokenStakedAmount = getTotalStakedBalance();
         pool.totalLockedSupply = pool.totalLockedSupply > _amount ? pool.totalLockedSupply.sub(_amount) : 0;
         
-        //pay as manager profit
-        _safeSendAuto();
         emit _UnStakeToken(msg.sender, _pid, tokenABalance);
     }
     
-    function _safeSendAuto() internal {
-        
-        //pay as manager profit
-        uint autoBalance = IBEP20(autoaddress).balanceOf(address(this));
-        if(autoBalance > 0){
-            uint half = autoBalance.sub(autoBalance.div(2));
-            TransferHelper.safeTransfer(autoaddress, managerWallet, autoBalance.div(2)); 
-            TransferHelper.safeTransfer(autoaddress, platformWallet, half); 
-        }
-    }
     
     /// @dev user to unstake token 
     function harvestXWIN(uint _pid) external nonReentrant payable {
@@ -1676,93 +1297,87 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         TransferHelper.safeTransfer(xwin, burnAddress, burnFeeTotal); 
         TransferHelper.safeTransfer(xwin, msg.sender, xwinBalance.sub(burnFeeTotal));
         pool.totalXWINPaid = pool.totalXWINPaid.add(xwinBalance);
-        _autoFarm.withdraw(autopid, 0);
-        _safeSendAuto();
         emit _harvestXWIN(msg.sender, xwinBalance);
     }
 
-    function _exchangeDepositLP(uint _amount) internal returns (uint liquidity) {
+    // _amount is in ADA
+    function _exchangeDepositLP() internal returns (uint liquidity) {
         
-        uint halfAmt =  _amount.mul(5000).div(10000);
-        address[] memory path = new address[](2);
-        path[0] = tokenA;
-        path[1] = tokenB;
-        uint outputSwap = _swapTokenToToken(halfAmt, tokenA, address(this), path);
+        uint256 tokenABal = IBEP20(tokenA).balanceOf(address(this));
+        uint halfAmt =  tokenABal.mul(5000).div(10000); //this half is ADA
+        uint outputSwapInBNB = _swapTokenToETH(halfAmt);  // this half is BNB
 
         // get quote fixed usdt amount
-        // amountBToGo is usdc
-        uint amountBToGo = _getQuoteAdjusted(halfAmt, outputSwap);
-        (,, liquidity) = _addLiquidity(amountBToGo, halfAmt);
-        TransferHelper.safeApprove(tokenABLP, address(_autoFarm), liquidity); 
-        _autoFarm.deposit(autopid, liquidity);
-        return liquidity;
+        uint amountBToGo = _getQuoteAdjusted(outputSwapInBNB, halfAmt);
+        (,, liquidity) = _addLiquidityBNB(amountBToGo, outputSwapInBNB);
+        uint256 lpBal = IBEP20(tokenABLP).balanceOf(address(this));
+        TransferHelper.safeApprove(tokenABLP, address(_autoFarm), lpBal); 
+        _autoFarm.deposit(autopid, lpBal);
+        return lpBal;
     }
     
     function _removeFromLP(uint _amount) internal {
         
         _autoFarm.withdraw(autopid, _amount);
+        
+        uint lpbal = IBEP20(tokenABLP).balanceOf(address(this));
         uint LPtotalSupply = IBEP20(tokenABLP).totalSupply(); 
-        uint ratio = _amount.mul(1e18).div(LPtotalSupply);
-        uint amountA = 0;
-        uint amountB = 0;
-        
-        (uint  reserveA,  uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), tokenA, tokenB);
-        amountA = reserveA.mul(ratio).div(1e18);
-        amountB = PancakeLibrary.quote(amountA, reserveA, reserveB);
-        
-        uint amtAMin = amountA.sub(amountA.mul(slippage).div(10000));
-        uint amtBMin = amountB.sub(amountB.mul(slippage).div(10000));
-        
-        TransferHelper.safeApprove(tokenABLP, address(pancakeSwapRouter), _amount); 
-        pancakeSwapRouter.removeLiquidity(
-            tokenA,
-            tokenB,
-            _amount,
-            amtAMin,
-            amtBMin, 
-            address(this),
-            block.timestamp
-            );
-    }
-    
-    function _getQuotes(uint256 amountA) internal view returns (uint amountB, uint amountOut) {
-        
-        (uint reserveA, uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), tokenA, tokenB);
-        amountOut = PancakeLibrary.getAmountOut(amountA, reserveA, reserveB);
-        amountB = PancakeLibrary.quote(amountA, reserveA, reserveB);
-        return (amountB, amountOut);
-        
-    }
-    
-    function _getQuoteAdjusted(uint amountA, uint swapOutput) internal view returns (uint){
+        uint ratio = lpbal.mul(1e18).div(LPtotalSupply);
+        if(ratio > 0){
+            uint amountA = 0;
+            uint amountB = 0;
             
-            (uint amountB, ) = _getQuotes(amountA);
-            return (amountB > swapOutput ? swapOutput:  amountB);
+            (uint  reserveA,  uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), tokenA, pancakeSwapRouter.WETH());
+            amountA = reserveA.mul(ratio).div(1e18);
+            amountB = PancakeLibrary.quote(amountA, reserveA, reserveB);
+            
+            uint amtAMin = amountA.mul(9950).div(10000);
+            uint amtBMin = amountB.mul(9950).div(10000);
+            
+            TransferHelper.safeApprove(tokenABLP, address(pancakeSwapRouter), lpbal); 
+            pancakeSwapRouter.removeLiquidityETH(
+                tokenA,
+                lpbal,
+                amtAMin,
+                amtBMin, 
+                address(this),
+                block.timestamp
+            );
+        }
+    }
+    
+    function _getQuotes(uint256 bnbQty) internal view returns (uint amountB) {
+        
+        (uint reserveA, uint reserveB) = PancakeLibrary.getReserves(pancakeSwapRouter.factory(), pancakeSwapRouter.WETH(), tokenA);
+        amountB = PancakeLibrary.quote(bnbQty, reserveA, reserveB);
+        return amountB;        
+    }
+    
+    function _getQuoteAdjusted(
+        uint halfAmtInBNB,
+        uint halfAmtInTokenA
+        ) internal view returns (uint){
+            
+            uint amountB = _getQuotes(halfAmtInBNB);
+            return (amountB > halfAmtInTokenA ? halfAmtInTokenA:  amountB);
         } 
+    
+    function _addLiquidityBNB(
+            uint amount, 
+            uint bnbAmt
+            ) internal returns (uint amountToken, uint amountBNB, uint liquidity) {
         
-    function _addLiquidity(
-            uint tokenBAmount, 
-            uint tokenAAmount
-            )
-    internal returns (uint amountA_, uint amountB_, uint liquidity) {
+        TransferHelper.safeApprove(tokenA, address(pancakeSwapRouter), amount); 
         
-        TransferHelper.safeApprove(tokenB, address(pancakeSwapRouter), tokenBAmount); 
-        TransferHelper.safeApprove(tokenA, address(pancakeSwapRouter), tokenAAmount); 
-        
-        uint tokenAMin = tokenAAmount.sub(tokenAAmount.mul(slippage).div(10000));
-        uint tokenBMin = tokenBAmount.sub(tokenBAmount.mul(slippage).div(10000));
-        (amountA_, amountB_, liquidity) = pancakeSwapRouter.addLiquidity(
+        (amountToken, amountBNB, liquidity) = pancakeSwapRouter.addLiquidityETH{value: bnbAmt}(
             tokenA,
-            tokenB,
-            tokenAAmount,
-            tokenBAmount,
-            tokenAMin,
-            tokenBMin, 
+            amount,
+            amount.mul(9950).div(10000),
+            bnbAmt.mul(9950).div(10000), 
             address(this),
             block.timestamp
             );
-            
-        return (amountA_, amountB_, liquidity);
+        return (amountToken, amountBNB, liquidity);
             
     }
 
@@ -1771,18 +1386,13 @@ contract xWINPrivate is ReentrancyGuard, IBEP20, BEP20 {
         (uint afterBalance, uint beforeBalance, , ) = getBeforeAfterStakedLPAmount(_pid);
         uint profit = afterBalance.sub(beforeBalance);
         if(profit == 0) return;
-        uint referralFee =  0;
-        uint managerFee = 0;
         uint platformFee = 0;
-        if(managerFeeOnProfit > 0) managerFee = profit.mul(managerFeeOnProfit).div(10000);
         if(platformFeeOnProfit > 0) platformFee = profit.mul(platformFeeOnProfit).div(10000);
-        if(referralFeeOnProfit > 0) referralFee = profit.mul(referralFeeOnProfit).div(10000);
-        
-        _autoFarm.withdraw(autopid, managerFee.add(referralFee).add(platformFee));
-        
-        if(managerFee > 0) TransferHelper.safeTransfer(tokenABLP, managerWallet, managerFee); 
-        if(platformFee > 0) TransferHelper.safeTransfer(tokenABLP, platformWallet, platformFee); 
-        if(referralFee > 0) TransferHelper.safeTransfer(tokenABLP, referralWallet, referralFee); 
+        if(platformFee > 0){
+            _autoFarm.withdraw(autopid, platformFee);
+            uint256 lpBal = IBEP20(tokenABLP).balanceOf(address(this));        
+            if(lpBal > 0) TransferHelper.safeTransfer(tokenABLP, platformWallet, lpBal); 
+        }
     }
     
 }
