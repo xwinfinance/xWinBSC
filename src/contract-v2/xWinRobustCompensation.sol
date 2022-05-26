@@ -696,15 +696,13 @@ contract xWINRobustCompensation is ReentrancyGuard, Ownable {
     
     string public name;
 
-    /* Commented out for Test Net
     // Token Addresses in Real Net
     address public targetToken = address(0xd88ca08d8eec1E9E09562213Ae83A7853ebB5d28);
-    */
 
     // Token Addresses in Test Net
     // XWIN Token
-    address public targetToken = address(0xa83575490D7df4E2F47b7D38ef351a2722cA45b9);
-    xWinCompensation _xWinCompensation = xWinCompensation(address(0x0BB18533Bfc96cA287548323b4c46FB8620bA5BF));
+    //address public targetToken = address(0xa83575490D7df4E2F47b7D38ef351a2722cA45b9);
+    xWinCompensation _xWinCompensation = xWinCompensation(address(0xB722B10c219442501f60d014FCD41A9C7fe65B75));
 
 
     
@@ -740,9 +738,10 @@ contract xWINRobustCompensation is ReentrancyGuard, Ownable {
         uint256 xwinTokenBal = IBEP20(targetToken).balanceOf(address(this));
 
         require(xwinTokenBal >= compensateBalance, "not enough to transfer");
+        hasWithdrawed[msg.sender] = true;
         TransferHelper.safeTransfer(targetToken, msg.sender, compensateBalance);
 
-        hasWithdrawed[msg.sender] = true;
+
 
     } 
     
